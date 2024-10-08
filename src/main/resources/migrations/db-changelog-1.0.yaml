@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Raisondetre
+      changes:
+        - sql: DROP TYPE IF EXISTS rating_enum
+        - sql: CREATE TYPE rating_enum AS ENUM ('1', '2', '3', '4', '5');
+  - changeSet:
+      id: 2
+      author: Raisondetre
+      changes:
+        - sqlFile:
+            path: /migrations/db-changelog-1.0.sql
+      rollback:
+        - sql: DROP TABLE IF EXISTS Event_Food CASCADE
+        - sql: DROP TABLE IF EXISTS Participant CASCADE
+        - sql: DROP TABLE IF EXISTS Ticket CASCADE
+        - sql: DROP TABLE IF EXISTS Notification CASCADE
+        - sql: DROP TABLE IF EXISTS Review CASCADE
+        - sql: DROP TABLE IF EXISTS Food CASCADE
+        - sql: DROP TABLE IF EXISTS Event CASCADE
+        - sql: DROP TABLE IF EXISTS Venue CASCADE
+        - sql: DROP TABLE IF EXISTS Location CASCADE
+        - sql: DROP TABLE IF EXISTS Category CASCADE
+        - sql: DROP TABLE IF EXISTS App_User CASCADE
+        - sql: DROP TYPE IF EXISTS rating_enum
