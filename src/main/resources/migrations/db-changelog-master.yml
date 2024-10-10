@@ -11,3 +11,12 @@ databaseChangeLog:
       file: db-changelog-3.0.yaml
       relativeToChangelogFile: true
 
+  - include:
+      file: db-changelog-4.0.yaml
+      relativeToChangelogFile: true
+
+# Т. к. селекты не выполняются при запуске миграций,
+#  то приходится выполнять тесты, связанные с функциями и предикатами в ручную
+#  - include:
+#      file: db-changelog-5.0.yaml
+#      relativeToChangelogFile: true

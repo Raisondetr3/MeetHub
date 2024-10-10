@@ -1,11 +1,11 @@
 databaseChangeLog:
   - changeSet:
-      id: 3
+      id: 6
       author: Raisondetre
       changes:
         - sqlFile:
-            path: /migrations/triggers.sql
+            path: /migrations/function-and-procedure-tests.sql
             splitStatements: false
       rollback:
         - sqlFile:
-            path: /migrations/rollback-triggers.sql
+            path: /migrations/rollback-function-and-procedure-tests.sql

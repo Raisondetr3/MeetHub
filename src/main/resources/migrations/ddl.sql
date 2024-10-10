@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS Event (
                        description TEXT,
                        date TIMESTAMP NOT NULL,
                        venue_id INT NOT NULL REFERENCES Venue(id),
-                       category_id INT NOT NULL REFERENCES Category(id)
+                       category_id INT NOT NULL REFERENCES Category(id),
+                       updated_at TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS Food (

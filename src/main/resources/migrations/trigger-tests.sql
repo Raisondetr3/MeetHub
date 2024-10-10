@@ -9,72 +9,72 @@ VALUES ('Test-Venue',
 
 INSERT INTO Category (name) VALUES ('Test-Category');
 
--- Данные подготовлены, можно создавать запись в Event
-INSERT INTO Event (name, description, date, venue_id, category_id)
+INSERT INTO Event (name, description, date, venue_id, category_id, updated_at)
 VALUES ('Test-Event',
         'Testing event creation',
         NOW() + INTERVAL '1 day',
         (SELECT id FROM Venue WHERE name = 'Test-Venue'),
-        (SELECT id FROM Category WHERE name = 'Test-Category'));
+        (SELECT id FROM Category WHERE name = 'Test-Category'),
+        NOW());
 
 
--- Обновляем событие, чтобы проверить, что `updated_at` обновляется
+-- =======================================
+-- Тест 1: Обновление времени изменения события (Триггер set_timestamp)
+-- =======================================
 UPDATE Event
-SET name = 'Updated Test Event'
-WHERE id = 1;
+SET name = 'Updated Test-Event'
+WHERE name = 'Test-Event';
+
+-- Проверка результата (должно быть изменено поле updated_at)
+SELECT name, updated_at FROM Event WHERE name = 'Updated Test-Event';
 
 
--- Проверка триггера для проверки даты события
--- Попытка вставить событие с датой в прошлом (должно сгенерировать ошибку)
+-- =======================================
+-- Тест 2: Проверка триггера на проверку даты события (Триггер check_event_date)
+-- =======================================
+-- Попытка вставить событие с датой в прошлом (должно сгенерировать ошибку и не вставить запись)
 DO $$
-    BEGIN
-        INSERT INTO Event (name, description, date, venue_id, category_id)
-        VALUES ('Past-Event',
-                'This event is in the past',
-                NOW() - INTERVAL '1 day',
-                (SELECT id FROM Venue WHERE name = 'Test-Venue'),
-                (SELECT id FROM Category WHERE name = 'Test-Category'));
+BEGIN
+INSERT INTO Event (name, description, date, venue_id, category_id)
+VALUES ('Past-Event',
+        'This event is in the past',
+        NOW() - INTERVAL '1 day',
+        (SELECT id FROM Venue WHERE name = 'Test-Venue'),
+        (SELECT id FROM Category WHERE name = 'Test-Category'));
 EXCEPTION
     WHEN OTHERS THEN
         RAISE NOTICE 'Trigger successfully prevented event creation with a past date.';
 END $$;
 
--- Проверка триггера на создание уведомлений
+-- Проверка результата (событие с именем 'Past-Event' не должно существовать)
+SELECT * FROM Event WHERE name = 'Past-Event';
 
--- Добавляем тестовых участников для проверки уведомлений
+
+-- =======================================
+-- Тест 3: Проверка вместимости события (Триггер check_capacity_trigger)
+-- =======================================
 INSERT INTO App_User (username, email, password)
 VALUES ('user1', 'user1@test.com', 'pass1');
 
 INSERT INTO App_User (username, email, password)
 VALUES ('user2', 'user2@test.com', 'pass2');
 
--- Добавляем тестовых участников для существующего события
-INSERT INTO Participant (user_id, event_id, is_creator)
-VALUES ((SELECT id FROM App_User WHERE username = 'user1'),
-        (SELECT id FROM Event WHERE name = 'Test-Event'), true);
-
-INSERT INTO Participant (user_id, event_id, is_creator)
-VALUES ((SELECT id FROM App_User WHERE username = 'user2'),
-        (SELECT id FROM Event WHERE name = 'Test-Event'), false);
-
-
--- Создаем новое событие, чтобы проверить, что уведомления создаются
-INSERT INTO Event (name, description, date, venue_id, category_id)
-VALUES ('Notification Test Event',
-        'This event tests notification creation',
-        NOW() + INTERVAL '2 days',
-        (SELECT id FROM Venue WHERE name = 'Test-Venue'),
-        (SELECT id FROM Category WHERE name = 'Test-Category'));
-
-SELECT * FROM Notification WHERE event_id = (SELECT id FROM Event WHERE name = 'Notification Test Event');
-
 -- Добавление новых участников до достижения вместимости (capacity = 3)
 INSERT INTO App_User (username, email, password)
 VALUES ('user3', 'user3@test.com', 'pass3');
 
+-- Добавляем тестовых участников для существующего события
+INSERT INTO Participant (user_id, event_id, is_creator)
+VALUES ((SELECT id FROM App_User WHERE username = 'user1'),
+        (SELECT id FROM Event WHERE name = 'Updated Test-Event'), true);
+
+INSERT INTO Participant (user_id, event_id, is_creator)
+VALUES ((SELECT id FROM App_User WHERE username = 'user2'),
+        (SELECT id FROM Event WHERE name = 'Updated Test-Event'), false);
+
 INSERT INTO Participant (user_id, event_id, is_creator)
 VALUES ((SELECT id FROM App_User WHERE username = 'user3'),
-        (SELECT id FROM Event WHERE name = 'Test-Event'), false);
+        (SELECT id FROM Event WHERE name = 'Updated Test-Event'), false);
 
 -- Проверка триггера на вместимость события
 -- Ожидаемая ошибка при попытке добавить больше участников, чем разрешено вместимостью
@@ -82,11 +82,18 @@ INSERT INTO App_User (username, email, password)
 VALUES ('user4', 'user4@test.com', 'pass4');
 
 DO $$
-    BEGIN
-        INSERT INTO Participant (user_id, event_id, is_creator)
-        VALUES ((SELECT id FROM App_User WHERE username = 'user4'),
-                (SELECT id FROM Event WHERE name = 'Test-Event'), false);
+BEGIN
+INSERT INTO Participant (user_id, event_id, is_creator)
+VALUES ((SELECT id FROM App_User WHERE username = 'user4'),
+        (SELECT id FROM Event WHERE name = 'Updated Test-Event'), false);
 EXCEPTION
     WHEN OTHERS THEN
         RAISE NOTICE 'Trigger successfully prevented participant addition beyond capacity.';
 END $$;
+
+-- Проверка, что 'user4' не был добавлен
+SELECT * FROM Participant WHERE event_id = (SELECT id FROM Event WHERE name = 'Updated Test-Event')
+                            AND user_id = (SELECT id FROM App_User WHERE username = 'user4');
+
+
+

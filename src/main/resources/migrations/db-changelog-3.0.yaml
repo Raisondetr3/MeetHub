@@ -7,5 +7,5 @@ databaseChangeLog:
             path: /migrations/trigger-tests.sql
             splitStatements: false
       rollback:
-        - sql:
+        - sqlFile:
             path: /migrations/rollback-tests.sql

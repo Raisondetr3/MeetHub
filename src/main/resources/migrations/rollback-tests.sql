@@ -1,17 +1,23 @@
--- Откат тестовых данных, добавленных для проверки триггеров
+DELETE FROM Participant
+WHERE event_id IN (1, 3, 4);
 
--- Удаление тестовых событий
-DELETE FROM Event WHERE name IN ('Test-Event', 'Updated Test Event', 'Past-Event', 'Notification Test Event');
+DELETE FROM Review
+WHERE user_id IN (SELECT id FROM App_User WHERE username IN ('user1', 'user2', 'user3', 'user4', 'user12'));
 
-DELETE FROM Users WHERE email IN ('user1@test.com', 'user2@test.com');
+DELETE FROM App_User
+WHERE username IN ('user1', 'user2', 'user3', 'user4', 'user12');
 
--- Удаление тестовых участников
-DELETE FROM Participant WHERE user_id IN (1, 2);
+DELETE FROM Event_Food
+WHERE event_id IN (1, 3, 4);
 
--- Удаление всех уведомлений, созданных во время тестов
-DELETE FROM Notification WHERE content LIKE 'New event created:%';
+DELETE FROM Event
+WHERE id IN (1, 3, 4);
 
--- Удаление созданных для теста билетов
-DELETE FROM Ticket WHERE event_id IN (SELECT id FROM Event WHERE name = 'Test-Event');
+DELETE FROM Category
+WHERE id IN (1, 2);
 
--- Дополнительная чистка, если нужно удалить другие тестовые данные
+DELETE FROM Venue
+WHERE id IN (1, 2, 4);
+
+DELETE FROM Location
+WHERE id IN (1, 2);

@@ -28,23 +28,6 @@ CREATE TRIGGER check_event_date_trigger
                          FOR EACH ROW
                          EXECUTE FUNCTION check_event_date();
 
--- Создание уведомлений при добавлении нового события
-CREATE OR REPLACE FUNCTION create_notification_for_new_event()
-RETURNS TRIGGER AS $$
-BEGIN
-INSERT INTO Notification (user_id, event_id, content, sent_at)
-SELECT user_id, NEW.id, 'New event created: ' || NEW.name, NOW()
-FROM Participant
-WHERE event_id = NEW.id;
-RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER create_notification_trigger
-    AFTER INSERT ON Event
-    FOR EACH ROW
-    EXECUTE FUNCTION create_notification_for_new_event();
-
 -- Проверка вместимости события
 CREATE OR REPLACE FUNCTION check_event_capacity()
 RETURNS TRIGGER AS $$
