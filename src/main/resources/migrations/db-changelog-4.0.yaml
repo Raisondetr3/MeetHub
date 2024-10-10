@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 5
+      author: Raisondetre
+      changes:
+        - sqlFile:
+            path: /migrations/functions-and-procedures.sql
+            splitStatements: false
+      rollback:
+        - sqlFile:
+            path: /migrations/rollback-functions-and-procedures.sql
