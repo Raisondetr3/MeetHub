@@ -1,5 +1,5 @@
 -- =======================================
--- Тест 1: Создание мероприятия (Функция create_event)
+-- Тест 1: Создание мероприятия
 -- =======================================
 -- Подготовка данных для тестирования
 INSERT INTO Location (country, region, city, address)
@@ -22,11 +22,11 @@ SELECT create_event(
 
 
 -- Ожидаемый результат: ровно 1 запись в таблице.
-SELECT * FROM Event WHERE id = 4;
+SELECT * FROM Event WHERE id = 3;
 
 
 -- =======================================
--- Тест 2: Регистрация участника на мероприятие (Функция register_participant)
+-- Тест 2: Регистрация участника на мероприятие
 -- =======================================
 -- Предварительная вставка пользователей и мероприятия
 INSERT INTO App_User (username, email, password)
@@ -35,7 +35,7 @@ VALUES ('user12', 'user12@test.com', 'pass2');
 -- Вызов функции регистрации участника на мероприятие
 SELECT register_participant(
                (SELECT id FROM App_User WHERE username = 'user12'),
-               4
+               3
            );
 
 -- Ожидаемый результат: Успешная регистрация, пользователь должен быть добавлен в таблицу Participant
@@ -43,62 +43,45 @@ SELECT * FROM Participant WHERE user_id = (SELECT id FROM App_User WHERE usernam
 AND event_id = (SELECT id FROM Event WHERE name = 'Test Event');
 
 -- =======================================
--- Тест 3: Оставление отзыва о мероприятии (Функция leave_review)
+-- Тест 3: Оставление отзыва о мероприятии
 -- =======================================
--- Вставка отзывов
-DO $$
-BEGIN
-    -- Вызов функции добавления отзыва
-    SELECT leave_review(5, 4, '5', 'Great event!');
-EXCEPTION
-    WHEN OTHERS THEN
-        RAISE NOTICE 'Error during review: The event might not be finished yet or the user is not registered.';
-END $$;
+SELECT leave_review(5, 3, '5', 'Great event!');
 
 -- Ожидаемый результат: отзыв добавлен в таблицу Review
 SELECT * FROM Review WHERE user_id = (SELECT id FROM App_User WHERE username = 'user12')
-AND event_id = 1;
+AND event_id = 3;
 
 -- =======================================
--- Тест 4: Добавление информации о еде на мероприятие (Функция add_food_to_event)
+-- Тест 4: Добавление информации о еде на мероприятие
 -- =======================================
--- Вызов функции для добавления еды к мероприятию
-DO $$
-BEGIN
-    SELECT add_food_to_event(
-        1,  -- Организатор
-        4,
-        'Sandwich',
-        'A vegetarian sandwich'
-    );
-EXCEPTION
-    WHEN OTHERS THEN
-        RAISE NOTICE 'Error during food addition: The user might not be the organizer.';
-END $$;
+SELECT add_food_to_event(
+    4,  -- Организатор
+    3,
+    'Sandwich',
+    'A vegetarian sandwich'
+);
 
 -- Ожидаемый результат: Еда должна быть добавлена и связана с мероприятием
 SELECT * FROM Event_Food WHERE event_id = (SELECT id FROM Event WHERE name = 'Test Event');
 SELECT * FROM Food WHERE name = 'Sandwich';
 
 
-
-
 -- =======================================
--- Тест 5: Изменение категории мероприятия (Процедура update_event_category)
+-- Тест 5: Изменение категории мероприятия
 -- =======================================
 -- Добавляем новую категорию
 INSERT INTO Category (name) VALUES ('Updated Category');
 
-CALL update_event_category(4, 4);
+CALL update_event_category(3, 3);
 
 
 -- Ожидаемый результат: Категория мероприятия изменена
-SELECT * FROM Event WHERE id = 4;
+SELECT * FROM Event WHERE id = 3;
 
 -- =======================================
 -- Тест 6: Изменение вместимости мероприятия (Процедура update_event_capacity)
 -- =======================================
-CALL update_event_capacity(4, 150);
+CALL update_event_capacity(3, 150);
 
 -- Ожидаемый результат: Вместимость изменена
 SELECT capacity FROM Venue WHERE id = 1;

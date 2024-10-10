@@ -60,12 +60,12 @@ BEGIN
 
     -- Проверка регистрации участника на мероприятие
     IF NOT EXISTS (SELECT 1 FROM Participant WHERE user_id = _user_id AND event_id = _event_id) THEN
-        RAISE EXCEPTION 'The user is not the organizer of the event.';
+        RAISE EXCEPTION 'The user is not registered for this event.';
     END IF;
 
-    -- Добавление отзыва
+
 INSERT INTO Review (user_id, event_id, rating, comment, created_at)
-VALUES (_user_id, _event_id, _rating, _comment, NOW());
+    VALUES (_user_id, _event_id, _rating, _comment, NOW());
 END;
 $$ LANGUAGE plpgsql;
 
