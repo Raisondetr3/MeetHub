@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Raisondetre
+      changes:
+        - sql: DROP TYPE IF EXISTS rating_enum
+        - sql: CREATE TYPE rating_enum AS ENUM ('1', '2', '3', '4', '5');
+      rollback:
+        - sql: DROP TYPE IF EXISTS rating_enum CASCADE
+
+  - changeSet:
+      id: 2
+      author: Raisondetre
+      changes:
+        - sqlFile:
+            path: /migrations/ddl.sql
+      rollback:
+        - sqlFile:
+            path: /migrations/rollback-ddl.sql
