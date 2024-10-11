@@ -1,0 +1,84 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3
+      author: Raisondetre
+      changes:
+        - loadData:
+            file: /migrations/mock_data/app_user.csv
+            tableName: app_user
+        - loadData:
+            file: /migrations/mock_data/location.csv
+            tableName: location
+        - loadData:
+            file: /migrations/mock_data/venue.csv
+            tableName: venue
+        - loadData:
+            file: /migrations/mock_data/category.csv
+            tableName: category
+        - loadData:
+            file: /migrations/mock_data/event.csv
+            tableName: event
+            columns:
+              - column:
+                  name: name
+                  type: STRING
+              - column:
+                  name: description
+                  type: STRING
+        - loadData:
+            file: /migrations/mock_data/participant.csv
+            tableName: participant
+            columns:
+              - column:
+                  name: is_creator
+                  type: STRING
+        - loadData:
+            file: /migrations/mock_data/review.csv
+            tableName: review
+            columns:
+              - column:
+                  name: rating
+                  type: STRING
+              - column:
+                  name: comment
+                  type: STRING
+        - loadData:
+            file: /migrations/mock_data/food.csv
+            tableName: food
+            columns:
+              - column:
+                  name: name
+                  type: STRING
+              - column:
+                  name: composition
+                  type: STRING
+        - loadData:
+            file: /migrations/mock_data/event_food.csv
+            tableName: event_food
+        - loadData:
+            file: /migrations/mock_data/notification.csv
+            tableName: notification
+            columns:
+              - column:
+                  name: content
+                  type: STRING
+        - loadData:
+            file: /migrations/mock_data/ticket.csv
+            tableName: ticket
+            columns:
+              - column:
+                  name: seat_number
+                  type: STRING
+
+      rollback:
+        - sql: TRUNCATE TABLE app_user CASCADE
+        - sql: TRUNCATE TABLE location CASCADE
+        - sql: TRUNCATE TABLE venue CASCADE
+        - sql: TRUNCATE TABLE category CASCADE
+        - sql: TRUNCATE TABLE event CASCADE
+        - sql: TRUNCATE TABLE participant CASCADE
+        - sql: TRUNCATE TABLE review CASCADE
+        - sql: TRUNCATE TABLE food CASCADE
+        - sql: TRUNCATE TABLE event_food CASCADE
+        - sql: TRUNCATE TABLE notification CASCADE
+        - sql: TRUNCATE TABLE ticket CASCADE

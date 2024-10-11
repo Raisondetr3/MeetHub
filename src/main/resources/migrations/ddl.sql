@@ -7,9 +7,9 @@ CREATE TABLE IF NOT EXISTS App_User (
 
 CREATE TABLE IF NOT EXISTS Location (
                           id SERIAL PRIMARY KEY,
-                          country VARCHAR(50) NOT NULL,
-                          region VARCHAR(50) NOT NULL,
-                          city VARCHAR(50) NOT NULL,
+                          country VARCHAR(100) NOT NULL,
+                          region VARCHAR(100) NOT NULL,
+                          city VARCHAR(100) NOT NULL,
                           address VARCHAR(255) NOT NULL
 );
 
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS Event (
                        date TIMESTAMP NOT NULL,
                        venue_id INT NOT NULL REFERENCES Venue(id),
                        category_id INT NOT NULL REFERENCES Category(id),
-                       updated_at TIMESTAMP
+                       updated_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS Food (
