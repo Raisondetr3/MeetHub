@@ -16,7 +16,7 @@ public class Category {
     private Integer id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 50, unique = true)
     private CategoryEnum name;
 }
 

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(name = "participant")
@@ -42,6 +43,19 @@ public class Participant {
 
         @Column(name = "event_id")
         private Integer eventId;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ParticipantId that = (ParticipantId) o;
+            return Objects.equals(userId, that.userId) && Objects.equals(eventId, that.eventId);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(userId, eventId);
+        }
     }
 }
 
