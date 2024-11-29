@@ -34,8 +34,11 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
   /**
    * Находит категорию по мероприятию и рейтинге.
+   *
    * @param event мероприятие, на котором был оставлен отзыв
+   *
    * @param rating рейтинг
+   *
    * @return отзыв
    */
   List<Review> findByEventAndRating(Event event, Rating rating);

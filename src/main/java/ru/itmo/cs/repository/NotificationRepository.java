@@ -14,7 +14,9 @@ import ru.itmo.cs.entity.User;
 public interface NotificationRepository extends JpaRepository<Notification, Integer> {
   /**
    * Находит уведомление по пользователю.
+   *
    * @param user пользователь, к которому отправлено уведомления
+   *
    * @return уведомление
    */
   List<Notification> findByUser(User user);

@@ -23,7 +23,9 @@ public interface VenueRepository extends JpaRepository<Venue, Integer> {
 
   /**
    * Находит место проведения по местоположению.
+   *
    * @param location местоположение места проведения
+   *
    * @return место проведения
    */
   Optional<Venue> findByLocation(Location location);
