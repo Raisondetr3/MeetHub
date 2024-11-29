@@ -96,7 +96,7 @@ class EventRepositoryTest extends IntegrationTestBase {
     void testFindEventsByCategoryName() {
         eventRepository.save(defaultEvent);
 
-        List<Event> events = eventRepository.findByCategory_Name(CategoryEnum.SEMINAR);
+        List<Event> events = eventRepository.findByCategoryName(CategoryEnum.SEMINAR);
 
         assertThat(events).hasSize(1);
         assertThat(events.get(0).getCategory().getName()).isEqualTo(CategoryEnum.SEMINAR);

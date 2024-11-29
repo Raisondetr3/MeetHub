@@ -1,8 +1,22 @@
 package ru.itmo.cs.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
+/**
+ * Билет.
+ */
 @Entity
 @Table(name = "ticket")
 @Getter
@@ -11,19 +25,18 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class Ticket {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Column(name = "seat_number", length = 10)
-    private String seatNumber;
+  @Column(name = "seat_number", length = 10)
+  private String seatNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "event_id", nullable = false)
-    private Event event;
+  @ManyToOne
+  @JoinColumn(name = "event_id", nullable = false)
+  private Event event;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+  @ManyToOne
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 }
-
