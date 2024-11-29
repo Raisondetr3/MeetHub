@@ -22,4 +22,3 @@ public enum CategoryEnum {
 
   private final String displayName;
 }
-

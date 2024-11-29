@@ -49,4 +49,3 @@ public class Notification {
   @CreationTimestamp
   private Date sentAt;
 }
-

@@ -33,4 +33,3 @@ public class Category {
   @Column(nullable = false, length = 50, unique = true)
   private CategoryEnum name;
 }
-

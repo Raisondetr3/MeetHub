@@ -28,4 +28,3 @@ public interface VenueRepository extends JpaRepository<Venue, Integer> {
    */
   Optional<Venue> findByLocation(Location location);
 }
-

@@ -29,7 +29,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
    *
    * @return пользователь
    */
-  @Query("SELECT u FROM User u JOIN Participant p ON u.id = p.id.userId WHERE p.event.id = :eventId")
+  @Query(
+      "SELECT u FROM User u JOIN Participant p ON u.id = p.id.userId WHERE p.event.id ="
+          + " :eventId")
   List<User> findParticipantsByEventId(@Param("eventId") Integer eventId);
 }
-

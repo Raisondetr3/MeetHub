@@ -39,4 +39,3 @@ public class Food {
   @Column(columnDefinition = "TEXT")
   private String composition;
 }
-

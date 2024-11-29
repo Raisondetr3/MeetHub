@@ -9,12 +9,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class MeetHub {
   /**
-    * Основной класс.
-    *
-    * @param args аргументы запуска при необходимости.
-    */
+   * Основной класс.
+   *
+   * @param args аргументы запуска при необходимости.
+   */
   public static void main(String[] args) {
     SpringApplication.run(MeetHub.class, args);
   }
-
 }

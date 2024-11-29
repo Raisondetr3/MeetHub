@@ -14,7 +14,8 @@ import ru.itmo.cs.entity.User;
  * Репозиторий участника для обращения к БД.
  */
 @Repository
-public interface ParticipantRepository extends JpaRepository<Participant, Participant.ParticipantId> {
+public interface ParticipantRepository
+    extends JpaRepository<Participant, Participant.ParticipantId> {
   /**
    * Находит участника по мероприятию.
    *

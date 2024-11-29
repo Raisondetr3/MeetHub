@@ -40,4 +40,3 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
    */
   List<Review> findByEventAndRating(Event event, Rating rating);
 }
-

@@ -17,4 +17,3 @@ public enum Rating {
 
   private final int stars;
 }
-

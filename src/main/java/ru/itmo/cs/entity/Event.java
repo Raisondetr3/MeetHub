@@ -55,12 +55,9 @@ public class Event {
   @JoinTable(
       name = "event_food",
       joinColumns = @JoinColumn(name = "event_id"),
-      inverseJoinColumns = @JoinColumn(name = "food_id")
-  )
+      inverseJoinColumns = @JoinColumn(name = "food_id"))
   private List<Food> food = new ArrayList<>();
 
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 }
-
-

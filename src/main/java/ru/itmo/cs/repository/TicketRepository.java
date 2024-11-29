@@ -42,4 +42,3 @@ public interface TicketRepository extends JpaRepository<Ticket, Integer> {
    */
   Optional<Ticket> findBySeatNumberAndEvent(String seatNumber, Event event);
 }
-

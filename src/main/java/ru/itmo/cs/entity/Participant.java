@@ -28,8 +28,7 @@ import lombok.ToString;
 @ToString
 public class Participant {
 
-  @EmbeddedId
-  private ParticipantId id;
+  @EmbeddedId private ParticipantId id;
 
   @ManyToOne
   @MapsId("userId")
