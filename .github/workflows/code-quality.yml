@@ -1,0 +1,32 @@
+name: Code Quality Checks
+
+on:
+  push:
+    branches-ignore: []
+  pull_request:
+    branches-ignore: []
+
+jobs:
+  lint-and-format:
+    name: Lint and Format Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Run Checkstyle
+        run: mvn checkstyle:check
+      - name: Apply and Check Formatting
+        run: |
+          mvn spotless:apply
+          mvn spotless:check
