@@ -115,7 +115,17 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
+  <profiles>
+    <profile>
+      <id>test</id>
+      <activation>
+        <property>
+          <name>spring.profiles.active</name>
+          <value>test</value>
+        </property>
+      </activation>
+    </profile>
+  </profiles>
 	<build>
 		<plugins>
 			<plugin>
