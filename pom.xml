@@ -162,7 +162,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.4.0</version>
 				<configuration>
 					<configLocation>google_checks.xml</configLocation>
 					<consoleOutput>true</consoleOutput>
@@ -184,28 +184,27 @@
 				<artifactId>spotless-maven-plugin</artifactId>
 				<version>2.43.0</version>
 				<configuration>
-					<ratchetFrom>origin/main</ratchetFrom>
-					<formats>
-						<format>
-							<includes>
-								<include>.gitattributes</include>
-								<include>.gitignore</include>
-							</includes>
-							<trimTrailingWhitespace/>
-							<endWithNewline/>
-							<indent>
-								<tabs>true</tabs>
-								<spacesPerTab>4</spacesPerTab>
-							</indent>
-						</format>
-					</formats>
-					<java>
-						<googleJavaFormat>
-							<version>1.25.0</version>
-							<reflowLongStrings>true</reflowLongStrings>
-							<formatJavadoc>false</formatJavadoc>
-						</googleJavaFormat>
-					</java>
+          <formats>
+            <format>
+              <includes>
+                <include>.gitattributes</include>
+                <include>.gitignore</include>
+              </includes>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
+              <indent>
+                <tabs>true</tabs>
+                <spacesPerTab>4</spacesPerTab>
+              </indent>
+            </format>
+          </formats>
+          <java>
+            <googleJavaFormat>
+              <version>1.25.0</version>
+              <reflowLongStrings>true</reflowLongStrings>
+              <formatJavadoc>false</formatJavadoc>
+            </googleJavaFormat>
+          </java>
 				</configuration>
 			</plugin>
 		</plugins>
