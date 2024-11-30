@@ -25,7 +25,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Run Checkstyle
-        run: mvn checkstyle:check
+        run: mvn -X checkstyle:check
       - name: Apply and Check Formatting
         run: |
           mvn spotless:apply
