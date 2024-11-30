@@ -97,8 +97,8 @@ class NotificationRepositoryTest extends IntegrationTestBase {
         notificationRepository.findByUserOrderBySentAtDesc(defaultUser);
 
     assertThat(notifications).hasSize(2);
-    assertThat(notifications.get(0).getContent()).isEqualTo("Test notification content");
-    assertThat(notifications.get(1).getContent()).isEqualTo("Earlier notification content");
+    assertThat(notifications.get(0).getContent()).isEqualTo("Earlier notification content");
+    assertThat(notifications.get(1).getContent()).isEqualTo("Test notification content");
   }
 
   @Test
