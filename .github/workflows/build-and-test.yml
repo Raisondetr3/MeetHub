@@ -46,4 +46,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Run Integration Tests
-        run: mvn clean verify
+        run: mvn clean verify -Dspring.profiles.active=test
