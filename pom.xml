@@ -68,7 +68,13 @@
 		<dependency>
 			<groupId>com.puppycrawl.tools</groupId>
 			<artifactId>checkstyle</artifactId>
-			<version>10.12.1</version>
+			<version>9.3</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.antlr</groupId>
+          <artifactId>antlr4-runtime</artifactId>
+        </exclusion>
+      </exclusions>
 		</dependency>
     	<dependency>
       		<groupId>com.google.googlejavaformat</groupId>
@@ -114,6 +120,11 @@
 			<version>1.19.0</version>
 			<scope>test</scope>
 		</dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>31.0.1-jre</version>
+    </dependency>
 	</dependencies>
   <profiles>
     <profile>
@@ -162,7 +173,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.4.0</version>
+				<version>3.3.0</version>
 				<configuration>
 					<configLocation>google_checks.xml</configLocation>
 					<consoleOutput>true</consoleOutput>
