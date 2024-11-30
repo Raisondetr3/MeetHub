@@ -33,6 +33,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+    </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -65,16 +71,11 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>com.puppycrawl.tools</groupId>
-			<artifactId>checkstyle</artifactId>
-			<version>10.12.1</version>
-		</dependency>
-    	<dependency>
-      		<groupId>com.google.googlejavaformat</groupId>
-      		<artifactId>google-java-format</artifactId>
-      		<version>1.25.0</version>
-    	</dependency>
+    <dependency>
+      <groupId>com.google.googlejavaformat</groupId>
+      <artifactId>google-java-format</artifactId>
+      <version>1.25.0</version>
+    </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -91,7 +92,7 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
+    <dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
@@ -115,7 +116,17 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
+  <profiles>
+    <profile>
+      <id>test</id>
+      <activation>
+        <property>
+          <name>spring.profiles.active</name>
+          <value>test</value>
+        </property>
+      </activation>
+    </profile>
+  </profiles>
 	<build>
 		<plugins>
 			<plugin>
@@ -152,7 +163,19 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.6.0</version>
+        <dependencies>
+          <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>31.0.1-jre</version>
+          </dependency>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>10.20.2</version>
+          </dependency>
+        </dependencies>
 				<configuration>
 					<configLocation>google_checks.xml</configLocation>
 					<consoleOutput>true</consoleOutput>
@@ -174,28 +197,27 @@
 				<artifactId>spotless-maven-plugin</artifactId>
 				<version>2.43.0</version>
 				<configuration>
-					<ratchetFrom>origin/main</ratchetFrom>
-					<formats>
-						<format>
-							<includes>
-								<include>.gitattributes</include>
-								<include>.gitignore</include>
-							</includes>
-							<trimTrailingWhitespace/>
-							<endWithNewline/>
-							<indent>
-								<tabs>true</tabs>
-								<spacesPerTab>4</spacesPerTab>
-							</indent>
-						</format>
-					</formats>
-					<java>
-						<googleJavaFormat>
-							<version>1.25.0</version>
-							<reflowLongStrings>true</reflowLongStrings>
-							<formatJavadoc>false</formatJavadoc>
-						</googleJavaFormat>
-					</java>
+          <formats>
+            <format>
+              <includes>
+                <include>.gitattributes</include>
+                <include>.gitignore</include>
+              </includes>
+              <trimTrailingWhitespace/>
+              <endWithNewline/>
+              <indent>
+                <tabs>true</tabs>
+                <spacesPerTab>4</spacesPerTab>
+              </indent>
+            </format>
+          </formats>
+          <java>
+            <googleJavaFormat>
+              <version>1.25.0</version>
+              <reflowLongStrings>true</reflowLongStrings>
+              <formatJavadoc>false</formatJavadoc>
+            </googleJavaFormat>
+          </java>
 				</configuration>
 			</plugin>
 		</plugins>
