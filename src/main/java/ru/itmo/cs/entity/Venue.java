@@ -25,18 +25,18 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class Venue {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-  @Column(nullable = false, length = 100)
-  private String name;
+    @Column(nullable = false, length = 100)
+    private String name;
 
-  // Внешний ключ теперь в "venue"
-  @OneToOne
-  @JoinColumn(name = "location_id", nullable = false, unique = true)
-  private Location location;
+    // Внешний ключ теперь в "venue"
+    @OneToOne
+    @JoinColumn(name = "location_id", nullable = false, unique = true)
+    private Location location;
 
-  @Column(nullable = false)
-  private Integer capacity;
+    @Column(nullable = false)
+    private Integer capacity;
 }

@@ -7,8 +7,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,16 +28,16 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class Food {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-  @Column(nullable = false, length = 100)
-  private String name;
+    @Column(nullable = false, length = 100)
+    private String name;
 
-  @ManyToMany(mappedBy = "food")
-  private List<Event> events = new ArrayList<>();
+    @ManyToMany(mappedBy = "food")
+    private List<Event> events = new ArrayList<>();
 
-  @Column(columnDefinition = "TEXT")
-  private String composition;
+    @Column(columnDefinition = "TEXT")
+    private String composition;
 }
