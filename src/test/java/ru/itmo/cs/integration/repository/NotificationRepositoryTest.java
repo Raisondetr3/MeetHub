@@ -88,18 +88,22 @@ class NotificationRepositoryTest extends IntegrationTestBase {
     earlierNotification.setUser(defaultUser);
     earlierNotification.setEvent(defaultEvent);
     earlierNotification.setContent("Earlier notification content");
-    earlierNotification.setSentAt(new Date(System.currentTimeMillis() - 3600 * 1000)); // 1 hour ago
+    earlierNotification.setSentAt(new Date(1000));
 
-    notificationRepository.save(defaultNotification);
-    notificationRepository.save(earlierNotification);
+    notificationRepository.saveAndFlush(earlierNotification);
+
+    defaultNotification.setSentAt(new Date(2000));
+    notificationRepository.saveAndFlush(defaultNotification);
 
     List<Notification> notifications =
         notificationRepository.findByUserOrderBySentAtDesc(defaultUser);
 
+
     assertThat(notifications).hasSize(2);
-    assertThat(notifications.get(1).getContent()).isEqualTo("Test notification content");
-    assertThat(notifications.get(0).getContent()).isEqualTo("Earlier notification content");
+    assertThat(notifications.get(0).getContent()).isEqualTo("Test notification content");
+    assertThat(notifications.get(1).getContent()).isEqualTo("Earlier notification content");
   }
+
 
   @Test
   @DisplayName("Should not save Notification without User")
