@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.itmo.cs.dto.AuthResponseDto;
-import ru.itmo.cs.dto.LoginRequestDto;
-import ru.itmo.cs.dto.UserCreateDto;
+import ru.itmo.cs.dto.auth.AuthResponseDto;
+import ru.itmo.cs.dto.auth.LoginRequestDto;
+import ru.itmo.cs.dto.auth.UserCreateDto;
 import ru.itmo.cs.service.UserService;
 
 /**

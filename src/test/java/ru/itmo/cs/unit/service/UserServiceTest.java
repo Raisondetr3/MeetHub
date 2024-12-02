@@ -11,10 +11,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import ru.itmo.cs.dto.AuthResponseDto;
-import ru.itmo.cs.dto.LoginRequestDto;
-import ru.itmo.cs.dto.UserCreateDto;
-import ru.itmo.cs.dto.UserDto;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import ru.itmo.cs.dto.auth.AuthResponseDto;
+import ru.itmo.cs.dto.auth.LoginRequestDto;
+import ru.itmo.cs.dto.auth.UserCreateDto;
+import ru.itmo.cs.dto.auth.UserDto;
 import ru.itmo.cs.entity.User;
 import ru.itmo.cs.exception.UserAlreadyExistsException;
 import ru.itmo.cs.exception.UserNotFoundException;
@@ -39,7 +41,7 @@ class UserServiceTest {
     private JwtService jwtService;
 
     @Mock
-    private AuthenticationManager authenticationManager;
+    private PasswordEncoder passwordEncoder;
 
     @Test
     @DisplayName("Успешная регистрация нового пользователя")
@@ -50,6 +52,7 @@ class UserServiceTest {
         User savedUser = new User(1, createDto.getUsername(), createDto.getEmail(), "encodedPassword");
         UserDto expectedDto = new UserDto(1, createDto.getUsername(), createDto.getEmail());
 
+        when(userRepository.findByUsername(createDto.getUsername())).thenReturn(Optional.empty());
         when(entityMapper.toUserEntity(eq(createDto), any())).thenReturn(user);
         when(userRepository.save(user)).thenReturn(savedUser);
         when(entityMapper.toUserDto(savedUser)).thenReturn(expectedDto);
@@ -91,8 +94,8 @@ class UserServiceTest {
         User user = new User(1, loginDto.getUsername(), "test@example.com", "encodedPassword");
         UserDto userDto = new UserDto(1, user.getUsername(), user.getEmail());
 
-        when(authenticationManager.authenticate(any())).thenReturn(null); // Успешная аутентификация
         when(userRepository.findByUsername(loginDto.getUsername())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(loginDto.getPassword(), user.getPassword())).thenReturn(true);
         when(entityMapper.toUserDto(user)).thenReturn(userDto);
         when(jwtService.generateToken(loginDto.getUsername())).thenReturn("token");
         when(jwtService.getJwtExpiration()).thenReturn(3600000L);
@@ -111,8 +114,10 @@ class UserServiceTest {
     void shouldThrowExceptionWhenLoginFails() {
         // Arrange
         LoginRequestDto loginDto = new LoginRequestDto("testUser", "wrongPassword");
-        BadCredentialsException badCredentialsException = new BadCredentialsException("Bad credentials");
-        when(authenticationManager.authenticate(any())).thenThrow(badCredentialsException);
+        User user = new User(1, loginDto.getUsername(), "test@example.com", "encodedPassword");
+
+        when(userRepository.findByUsername(loginDto.getUsername())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(loginDto.getPassword(), user.getPassword())).thenReturn(false);
 
         // Act & Assert
         BadCredentialsException exception = assertThrows(
@@ -120,9 +125,8 @@ class UserServiceTest {
                 () -> userService.login(loginDto),
                 "Должно быть выброшено исключение при ошибке аутентификации"
         );
-        assertEquals("Bad credentials", exception.getMessage(), "Сообщение исключения должно совпадать");
+        assertEquals("Неверное имя пользователя или пароль", exception.getMessage());
     }
-
 
     @Test
     @DisplayName("Успешный поиск пользователя по ID")
@@ -192,3 +196,4 @@ class UserServiceTest {
         assertEquals("Пользователь с именем nonExistentUser не найден", exception.getMessage());
     }
 }
+

@@ -1,17 +1,14 @@
 package ru.itmo.cs.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.itmo.cs.dto.AuthResponseDto;
-import ru.itmo.cs.dto.LoginRequestDto;
-import ru.itmo.cs.dto.UserCreateDto;
-import ru.itmo.cs.dto.UserDto;
+import ru.itmo.cs.dto.auth.AuthResponseDto;
+import ru.itmo.cs.dto.auth.LoginRequestDto;
+import ru.itmo.cs.dto.auth.UserCreateDto;
+import ru.itmo.cs.dto.auth.UserDto;
 import ru.itmo.cs.entity.User;
 import ru.itmo.cs.exception.UserAlreadyExistsException;
 import ru.itmo.cs.exception.UserNotFoundException;
@@ -23,19 +20,12 @@ import ru.itmo.cs.util.EntityMapper;
  */
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserDetailsService {
+public class UserService {
 
     private final UserRepository userRepository;
     private final EntityMapper entityMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final AuthenticationManager authenticationManager;
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем " + username + " не найден"));
-    }
 
     /**
      * Регистрация нового пользователя.
@@ -64,14 +54,15 @@ public class UserService implements UserDetailsService {
      *
      * @param loginRequestDto DTO для входа
      * @return DTO с токеном, временем истечения и данными пользователя
+     * @throws BadCredentialsException если пароль не совпадает
      */
     public AuthResponseDto login(LoginRequestDto loginRequestDto) {
-        authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                loginRequestDto.getUsername(),
-                loginRequestDto.getPassword()
-            )
-        );
+        UserDetails userDetails = userRepository.findByUsername(loginRequestDto.getUsername())
+            .orElseThrow(() -> new BadCredentialsException("Неверное имя пользователя или пароль"));
+
+        if (!passwordEncoder.matches(loginRequestDto.getPassword(), userDetails.getPassword())) {
+            throw new BadCredentialsException("Неверное имя пользователя или пароль");
+        }
 
         UserDto user = findByUsername(loginRequestDto.getUsername());
 
@@ -81,32 +72,16 @@ public class UserService implements UserDetailsService {
         return new AuthResponseDto(token, expirationTime, user);
     }
 
-    /**
-     * Ищет пользователя по ID.
-     *
-     * @param id ID пользователя
-     * @return DTO найденного пользователя
-     * @throws UserNotFoundException если пользователь не найден
-     */
     public UserDto findById(Integer id) {
         return userRepository.findById(id)
             .map(entityMapper::toUserDto)
             .orElseThrow(() -> new UserNotFoundException("Пользователь с ID " + id + " не найден"));
     }
 
-    /**
-     * Ищет пользователя по имени.
-     *
-     * @param username имя пользователя
-     * @return DTO найденного пользователя
-     * @throws UserNotFoundException если пользователь не найден
-     */
     public UserDto findByUsername(String username) {
         return userRepository.findByUsername(username)
             .map(entityMapper::toUserDto)
             .orElseThrow(() -> new UserNotFoundException("Пользователь с именем " + username + " не найден"));
     }
 }
-
-
 

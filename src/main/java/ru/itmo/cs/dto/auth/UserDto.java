@@ -1,17 +1,17 @@
-package ru.itmo.cs.dto;
+package ru.itmo.cs.dto.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO для создания нового пользователя.
+ * DTO для передачи данных пользователя.
  */
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class UserCreateDto {
+@AllArgsConstructor
+public class UserDto {
+    private Integer id;
     private String username;
     private String email;
-    private String password;
 }

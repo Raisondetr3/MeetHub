@@ -2,8 +2,8 @@ package ru.itmo.cs.util;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import ru.itmo.cs.dto.UserCreateDto;
-import ru.itmo.cs.dto.UserDto;
+import ru.itmo.cs.dto.auth.UserCreateDto;
+import ru.itmo.cs.dto.auth.UserDto;
 import ru.itmo.cs.entity.User;
 
 /**

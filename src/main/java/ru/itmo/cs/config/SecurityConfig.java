@@ -6,19 +6,21 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import ru.itmo.cs.repository.UserRepository;
 import ru.itmo.cs.security.JwtAuthenticationFilter;
 import ru.itmo.cs.service.JwtService;
-import ru.itmo.cs.service.UserService;
 
 /**
  * Конфигурация безопасности приложения.
@@ -28,21 +30,20 @@ import ru.itmo.cs.service.UserService;
 public class SecurityConfig {
 
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
     /**
-     * Создает и настраивает фильтр аутентификации JWT.
+     * Создает фильтр для обработки JWT аутентификации.
      *
-     * @param authenticationManager менеджер аутентификации для проверки токенов
-     * @return настроенный экземпляр JwtAuthenticationFilter
+     * @return настроенный JwtAuthenticationFilter
      */
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter(
-        AuthenticationManager authenticationManager) {
-        return new JwtAuthenticationFilter(jwtService, authenticationManager);
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtService);
     }
 
     /**
-     * Создает конфигурацию безопасности для HTTP-запросов.
+     * Создает цепочку фильтров безопасности.
      *
      * @param http                  объект для настройки HTTP-безопасности
      * @param jwtAuthenticationFilter фильтр для обработки JWT аутентификации
@@ -51,48 +52,59 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   JwtAuthenticationFilter jwtAuthenticationFilter)
-        throws Exception {
+                                                   JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(request -> {
                 var corsConfiguration = new CorsConfiguration();
                 corsConfiguration.setAllowedOriginPatterns(List.of("*"));
-                corsConfiguration.setAllowedMethods(List.of(
-                    "GET",
-                    "POST",
-                    "PUT",
-                    "DELETE",
-                    "OPTIONS"
-                ));
+                corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 corsConfiguration.setAllowedHeaders(List.of("*"));
                 corsConfiguration.setAllowCredentials(true);
                 return corsConfiguration;
             }))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**")
-                .permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     /**
-     * Создает менеджер аутентификации.
+     * Создает бин UserDetailsService.
      *
-     * @param config конфигурация аутентификации
-     * @return экземпляр AuthenticationManager
-     * @throws Exception если создание менеджера аутентификации завершилось ошибкой
+     * @return экземпляр UserDetailsService
      */
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
-        throws Exception {
-        return config.getAuthenticationManager();
+    public UserDetailsService userDetailsService() {
+        return username -> userRepository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем " + username + " не найден"));
+    }
+
+    /**
+     * Создает поставщика аутентификации.
+     *
+     * @return настроенный AuthenticationProvider
+     */
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService());
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    /**
+     * Создает менеджер аутентификации.
+     *
+     * @return экземпляр AuthenticationManager
+     */
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationProvider authenticationProvider) {
+        return new ProviderManager(authenticationProvider);
     }
 
     /**
@@ -104,18 +116,8 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    /**
-     * Создает поставщика аутентификации, используя UserService.
-     *
-     * @param userService сервис для работы с данными пользователя
-     * @return настроенный AuthenticationProvider
-     */
-    @Bean
-    public AuthenticationProvider authenticationProvider(UserService userService) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userService);
-        provider.setPasswordEncoder(passwordEncoder());
-        return provider;
-    }
 }
+
+
+
+
