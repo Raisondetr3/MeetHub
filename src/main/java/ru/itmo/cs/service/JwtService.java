@@ -5,7 +5,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
 import java.util.function.Function;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -14,12 +15,13 @@ import org.springframework.stereotype.Service;
  * Сервис для работы с JWT токенами.
  */
 @Service
-@Slf4j
+@Setter
 public class JwtService {
 
     @Value("${security.jwt.secret-key}")
     private String secretKey;
 
+    @Getter
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
 
@@ -89,7 +91,10 @@ public class JwtService {
      * @return значение поля
      */
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        final Claims claims = Jwts.parser()
+            .setSigningKey(secretKey)
+            .setAllowedClockSkewSeconds(5)
+            .parseClaimsJws(token).getBody();
         return claimsResolver.apply(claims);
     }
 }

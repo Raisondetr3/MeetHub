@@ -1,15 +1,20 @@
 package ru.itmo.cs.service;
 
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.itmo.cs.dto.AuthResponseDto;
+import ru.itmo.cs.dto.LoginRequestDto;
 import ru.itmo.cs.dto.UserCreateDto;
 import ru.itmo.cs.dto.UserDto;
 import ru.itmo.cs.entity.User;
+import ru.itmo.cs.exception.UserAlreadyExistsException;
+import ru.itmo.cs.exception.UserNotFoundException;
 import ru.itmo.cs.repository.UserRepository;
 import ru.itmo.cs.util.EntityMapper;
 
@@ -23,15 +28,9 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final EntityMapper entityMapper;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
-
-    /**
-     * Загружает пользователя по имени для аутентификации.
-     *
-     * @param username имя пользователя
-     * @return UserDetails
-     * @throws UsernameNotFoundException если пользователь не найден
-     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username)
@@ -39,39 +38,75 @@ public class UserService implements UserDetailsService {
     }
 
     /**
-     * Регистрирует нового пользователя.
+     * Регистрация нового пользователя.
      *
      * @param dto DTO для создания пользователя
-     * @return DTO созданного пользователя
+     * @return DTO с токеном, временем истечения и данными пользователя
+     * @throws UserAlreadyExistsException если пользователь с таким именем уже существует
      */
-    public UserDto registerUser(UserCreateDto dto) {
+    public AuthResponseDto register(UserCreateDto dto) {
         if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
-            throw new IllegalStateException("Пользователь с таким именем уже существует");
+            throw new UserAlreadyExistsException("Пользователь с таким именем уже существует");
         }
 
         User user = entityMapper.toUserEntity(dto, passwordEncoder);
         User savedUser = userRepository.save(user);
-        return entityMapper.toUserDto(savedUser);
+        UserDto registeredUser = entityMapper.toUserDto(savedUser);
+
+        String token = jwtService.generateToken(registeredUser.getUsername());
+        long expirationTime = System.currentTimeMillis() + jwtService.getJwtExpiration();
+
+        return new AuthResponseDto(token, expirationTime, registeredUser);
     }
 
     /**
-     * Ищет пользователя по его ID.
+     * Вход в систему.
+     *
+     * @param loginRequestDto DTO для входа
+     * @return DTO с токеном, временем истечения и данными пользователя
+     */
+    public AuthResponseDto login(LoginRequestDto loginRequestDto) {
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                loginRequestDto.getUsername(),
+                loginRequestDto.getPassword()
+            )
+        );
+
+        UserDto user = findByUsername(loginRequestDto.getUsername());
+
+        String token = jwtService.generateToken(user.getUsername());
+        long expirationTime = System.currentTimeMillis() + jwtService.getJwtExpiration();
+
+        return new AuthResponseDto(token, expirationTime, user);
+    }
+
+    /**
+     * Ищет пользователя по ID.
      *
      * @param id ID пользователя
      * @return DTO найденного пользователя
+     * @throws UserNotFoundException если пользователь не найден
      */
-    public Optional<UserDto> findById(Integer id) {
+    public UserDto findById(Integer id) {
         return userRepository.findById(id)
-            .map(entityMapper::toUserDto);
+            .map(entityMapper::toUserDto)
+            .orElseThrow(() -> new UserNotFoundException("Пользователь с ID " + id + " не найден"));
     }
 
     /**
-     * Проверяет, существует ли пользователь с указанным именем.
+     * Ищет пользователя по имени.
      *
      * @param username имя пользователя
-     * @return true, если пользователь существует
+     * @return DTO найденного пользователя
+     * @throws UserNotFoundException если пользователь не найден
      */
-    public boolean existsByUsername(String username) {
-        return userRepository.findByUsername(username).isPresent();
+    public UserDto findByUsername(String username) {
+        return userRepository.findByUsername(username)
+            .map(entityMapper::toUserDto)
+            .orElseThrow(() -> new UserNotFoundException("Пользователь с именем " + username + " не найден"));
     }
 }
+
+
+

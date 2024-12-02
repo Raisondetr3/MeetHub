@@ -1,40 +1,50 @@
 package ru.itmo.cs.unit.service;
 
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import ru.itmo.cs.dto.AuthResponseDto;
+import ru.itmo.cs.dto.LoginRequestDto;
 import ru.itmo.cs.dto.UserCreateDto;
 import ru.itmo.cs.dto.UserDto;
 import ru.itmo.cs.entity.User;
+import ru.itmo.cs.exception.UserAlreadyExistsException;
+import ru.itmo.cs.exception.UserNotFoundException;
 import ru.itmo.cs.repository.UserRepository;
+import ru.itmo.cs.service.JwtService;
 import ru.itmo.cs.service.UserService;
 import ru.itmo.cs.util.EntityMapper;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
+@ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
+    @InjectMocks
     private UserService userService;
+
+    @Mock
     private UserRepository userRepository;
+
+    @Mock
     private EntityMapper entityMapper;
 
-    @BeforeEach
-    void setUp() {
-        userRepository = Mockito.mock(UserRepository.class);
-        entityMapper = Mockito.mock(EntityMapper.class);
-        userService = new UserService(userRepository, entityMapper, mock(PasswordEncoder.class));
-    }
+    @Mock
+    private JwtService jwtService;
+
+    @Mock
+    private AuthenticationManager authenticationManager;
 
     @Test
     @DisplayName("Успешная регистрация нового пользователя")
     void shouldRegisterUserSuccessfully() {
+        // Arrange
         UserCreateDto createDto = new UserCreateDto("testUser", "test@example.com", "password");
         User user = new User(null, createDto.getUsername(), createDto.getEmail(), "encodedPassword");
         User savedUser = new User(1, createDto.getUsername(), createDto.getEmail(), "encodedPassword");
@@ -43,11 +53,16 @@ class UserServiceTest {
         when(entityMapper.toUserEntity(eq(createDto), any())).thenReturn(user);
         when(userRepository.save(user)).thenReturn(savedUser);
         when(entityMapper.toUserDto(savedUser)).thenReturn(expectedDto);
+        when(jwtService.generateToken(createDto.getUsername())).thenReturn("token");
+        when(jwtService.getJwtExpiration()).thenReturn(3600000L);
 
-        UserDto result = userService.registerUser(createDto);
+        // Act
+        AuthResponseDto result = userService.register(createDto);
 
+        // Assert
         assertNotNull(result, "Результат не должен быть null");
-        assertEquals(expectedDto, result, "Возвращенный DTO должен соответствовать ожидаемому");
+        assertEquals("token", result.getToken(), "Токен должен быть корректным");
+        assertEquals(expectedDto, result.getUser(), "Пользователь должен совпадать с ожидаемым");
         verify(userRepository).save(user);
         verify(entityMapper).toUserDto(savedUser);
     }
@@ -60,85 +75,120 @@ class UserServiceTest {
         when(userRepository.findByUsername(createDto.getUsername())).thenReturn(Optional.of(new User()));
 
         // Act & Assert
-        IllegalStateException exception = assertThrows(
-                IllegalStateException.class,
-                () -> userService.registerUser(createDto),
+        UserAlreadyExistsException exception = assertThrows(
+                UserAlreadyExistsException.class,
+                () -> userService.register(createDto),
                 "Должно быть выброшено исключение при попытке регистрации существующего пользователя"
         );
         assertEquals("Пользователь с таким именем уже существует", exception.getMessage());
     }
 
     @Test
-    void shouldFindUserById() {
+    @DisplayName("Успешный вход в систему")
+    void shouldLoginSuccessfully() {
+        // Arrange
+        LoginRequestDto loginDto = new LoginRequestDto("testUser", "password");
+        User user = new User(1, loginDto.getUsername(), "test@example.com", "encodedPassword");
+        UserDto userDto = new UserDto(1, user.getUsername(), user.getEmail());
+
+        when(authenticationManager.authenticate(any())).thenReturn(null); // Успешная аутентификация
+        when(userRepository.findByUsername(loginDto.getUsername())).thenReturn(Optional.of(user));
+        when(entityMapper.toUserDto(user)).thenReturn(userDto);
+        when(jwtService.generateToken(loginDto.getUsername())).thenReturn("token");
+        when(jwtService.getJwtExpiration()).thenReturn(3600000L);
+
+        // Act
+        AuthResponseDto result = userService.login(loginDto);
+
+        // Assert
+        assertNotNull(result, "Результат не должен быть null");
+        assertEquals("token", result.getToken(), "Токен должен быть корректным");
+        assertEquals(userDto, result.getUser(), "Пользователь должен совпадать с ожидаемым");
+    }
+
+    @Test
+    @DisplayName("Ошибка при входе с неверными учетными данными")
+    void shouldThrowExceptionWhenLoginFails() {
+        // Arrange
+        LoginRequestDto loginDto = new LoginRequestDto("testUser", "wrongPassword");
+        BadCredentialsException badCredentialsException = new BadCredentialsException("Bad credentials");
+        when(authenticationManager.authenticate(any())).thenThrow(badCredentialsException);
+
+        // Act & Assert
+        BadCredentialsException exception = assertThrows(
+                BadCredentialsException.class,
+                () -> userService.login(loginDto),
+                "Должно быть выброшено исключение при ошибке аутентификации"
+        );
+        assertEquals("Bad credentials", exception.getMessage(), "Сообщение исключения должно совпадать");
+    }
+
+
+    @Test
+    @DisplayName("Успешный поиск пользователя по ID")
+    void shouldFindUserByIdSuccessfully() {
+        // Arrange
         User user = new User(1, "testUser", "test@example.com", "password");
-        UserDto expectedDto = new UserDto(user.getId(), user.getUsername(), user.getEmail());
+        UserDto expectedDto = new UserDto(1, "testUser", "test@example.com");
 
         when(userRepository.findById(1)).thenReturn(Optional.of(user));
         when(entityMapper.toUserDto(user)).thenReturn(expectedDto);
 
-        Optional<UserDto> result = userService.findById(1);
+        // Act
+        UserDto result = userService.findById(1);
 
-        assertTrue(result.isPresent(), "Пользователь должен быть найден");
-        assertEquals(expectedDto, result.get(), "Возвращенный DTO должен соответствовать ожидаемому");
+        // Assert
+        assertNotNull(result, "Результат не должен быть null");
+        assertEquals(expectedDto, result, "Пользователь должен совпадать с ожидаемым");
         verify(userRepository).findById(1);
     }
 
     @Test
-    @DisplayName("Возврат пустого результата, если пользователь не найден по ID")
-    void shouldReturnEmptyWhenUserNotFoundById() {
+    @DisplayName("Ошибка при поиске несуществующего пользователя по ID")
+    void shouldThrowExceptionWhenUserNotFoundById() {
+        // Arrange
         when(userRepository.findById(1)).thenReturn(Optional.empty());
 
-        Optional<UserDto> result = userService.findById(1);
-
-        assertFalse(result.isPresent(), "Пользователь не должен быть найден");
-        verify(userRepository).findById(1);
+        // Act & Assert
+        UserNotFoundException exception = assertThrows(
+                UserNotFoundException.class,
+                () -> userService.findById(1),
+                "Должно быть выброшено исключение при отсутствии пользователя"
+        );
+        assertEquals("Пользователь с ID 1 не найден", exception.getMessage());
     }
 
     @Test
-    void shouldLoadUserByUsernameSuccessfully() {
+    @DisplayName("Успешный поиск пользователя по имени")
+    void shouldFindUserByUsernameSuccessfully() {
+        // Arrange
         User user = new User(1, "testUser", "test@example.com", "password");
+        UserDto expectedDto = new UserDto(1, "testUser", "test@example.com");
+
         when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(user));
+        when(entityMapper.toUserDto(user)).thenReturn(expectedDto);
 
-        UserDetails result = userService.loadUserByUsername("testUser");
+        // Act
+        UserDto result = userService.findByUsername("testUser");
 
-        assertNotNull(result, "UserDetails не должен быть null");
-        assertEquals(user.getUsername(), result.getUsername(), "Имя пользователя должно совпадать");
+        // Assert
+        assertNotNull(result, "Результат не должен быть null");
+        assertEquals(expectedDto, result, "Пользователь должен совпадать с ожидаемым");
         verify(userRepository).findByUsername("testUser");
     }
 
     @Test
-    @DisplayName("Ошибка при загрузке пользователя по несуществующему имени")
+    @DisplayName("Ошибка при поиске несуществующего пользователя по имени")
     void shouldThrowExceptionWhenUserNotFoundByUsername() {
+        // Arrange
         when(userRepository.findByUsername("nonExistentUser")).thenReturn(Optional.empty());
 
-        UsernameNotFoundException exception = assertThrows(
-                UsernameNotFoundException.class,
-                () -> userService.loadUserByUsername("nonExistentUser"),
-                "Должно быть выброшено исключение, если пользователь не найден"
+        // Act & Assert
+        UserNotFoundException exception = assertThrows(
+                UserNotFoundException.class,
+                () -> userService.findByUsername("nonExistentUser"),
+                "Должно быть выброшено исключение при отсутствии пользователя"
         );
         assertEquals("Пользователь с именем nonExistentUser не найден", exception.getMessage());
-        verify(userRepository).findByUsername("nonExistentUser");
-    }
-
-    @Test
-    void shouldCheckIfUserExistsByUsername() {
-        String username = "testUser";
-        when(userRepository.findByUsername(username)).thenReturn(Optional.of(new User()));
-
-        boolean exists = userService.existsByUsername(username);
-
-        assertTrue(exists, "Пользователь должен существовать");
-        verify(userRepository).findByUsername(username);
-    }
-
-    @Test
-    void shouldReturnFalseIfUserDoesNotExistByUsername() {
-        String username = "nonExistentUser";
-        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
-
-        boolean exists = userService.existsByUsername(username);
-
-        assertFalse(exists, "Пользователь не должен существовать");
-        verify(userRepository).findByUsername(username);
     }
 }
