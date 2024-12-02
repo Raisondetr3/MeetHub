@@ -11,12 +11,11 @@ import ru.itmo.cs.entity.CategoryEnum;
  */
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Integer> {
-  /**
-   * Находит категорию по названию.
-   *
-   * @param name название
-   *
-   * @return категория
-   */
-  Optional<Category> findByName(CategoryEnum name);
+    /**
+     * Находит категорию по названию.
+     *
+     * @param name название
+     * @return категория
+     */
+    Optional<Category> findByName(CategoryEnum name);
 }

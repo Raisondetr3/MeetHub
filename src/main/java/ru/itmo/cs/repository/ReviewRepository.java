@@ -14,32 +14,28 @@ import ru.itmo.cs.entity.User;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
-  /**
-   * Находит категорию по пользователю.
-   *
-   * @param user пользователь, который оставил отзыв
-   *
-   * @return отзыв
-   */
-  List<Review> findByUser(User user);
+    /**
+     * Находит категорию по пользователю.
+     *
+     * @param user пользователь, который оставил отзыв
+     * @return отзыв
+     */
+    List<Review> findByUser(User user);
 
-  /**
-   * Находит категорию по мероприятию.
-   *
-   * @param event мероприятие, на котором был оставлен отзыв
-   *
-   * @return отзыв
-   */
-  List<Review> findByEvent(Event event);
+    /**
+     * Находит категорию по мероприятию.
+     *
+     * @param event мероприятие, на котором был оставлен отзыв
+     * @return отзыв
+     */
+    List<Review> findByEvent(Event event);
 
-  /**
-   * Находит категорию по мероприятию и рейтинге.
-   *
-   * @param event мероприятие, на котором был оставлен отзыв
-   *
-   * @param rating рейтинг
-   *
-   * @return отзыв
-   */
-  List<Review> findByEventAndRating(Event event, Rating rating);
+    /**
+     * Находит категорию по мероприятию и рейтинге.
+     *
+     * @param event  мероприятие, на котором был оставлен отзыв
+     * @param rating рейтинг
+     * @return отзыв
+     */
+    List<Review> findByEventAndRating(Event event, Rating rating);
 }

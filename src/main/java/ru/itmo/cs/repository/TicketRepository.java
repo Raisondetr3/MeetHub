@@ -13,32 +13,28 @@ import ru.itmo.cs.entity.User;
  */
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Integer> {
-  /**
-   * Находит билета по пользователю.
-   *
-   * @param user пользователь, который приобрёл билет
-   *
-   * @return билет
-   */
-  List<Ticket> findByUser(User user);
+    /**
+     * Находит билета по пользователю.
+     *
+     * @param user пользователь, который приобрёл билет
+     * @return билет
+     */
+    List<Ticket> findByUser(User user);
 
-  /**
-   * Находит билета по мероприятию.
-   *
-   * @param event мероприятие, где используется билет
-   *
-   * @return билет
-   */
-  List<Ticket> findByEvent(Event event);
+    /**
+     * Находит билета по мероприятию.
+     *
+     * @param event мероприятие, где используется билет
+     * @return билет
+     */
+    List<Ticket> findByEvent(Event event);
 
-  /**
-   * Находит билета по номеру места и мероприятию.
-   *
-   * @param seatNumber номер места
-   *
-   * @param event мероприятие, где используется билет
-   *
-   * @return билет
-   */
-  Optional<Ticket> findBySeatNumberAndEvent(String seatNumber, Event event);
+    /**
+     * Находит билета по номеру места и мероприятию.
+     *
+     * @param seatNumber номер места
+     * @param event      мероприятие, где используется билет
+     * @return билет
+     */
+    Optional<Ticket> findBySeatNumberAndEvent(String seatNumber, Event event);
 }

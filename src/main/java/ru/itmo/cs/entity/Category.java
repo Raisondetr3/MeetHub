@@ -25,11 +25,11 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class Category {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Integer id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false, length = 50, unique = true)
-  private CategoryEnum name;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50, unique = true)
+    private CategoryEnum name;
 }

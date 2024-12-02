@@ -10,21 +10,19 @@ import ru.itmo.cs.entity.Location;
  */
 @Repository
 public interface LocationRepository extends JpaRepository<Location, Integer> {
-  /**
-   * Находит местоположение по стране.
-   *
-   * @param country название страны
-   *
-   * @return местоположение
-   */
-  List<Location> findByCountry(String country);
+    /**
+     * Находит местоположение по стране.
+     *
+     * @param country название страны
+     * @return местоположение
+     */
+    List<Location> findByCountry(String country);
 
-  /**
-   * Находит местоположение по городу.
-   *
-   * @param city название города
-   *
-   * @return местоположение
-   */
-  List<Location> findByCity(String city);
+    /**
+     * Находит местоположение по городу.
+     *
+     * @param city название города
+     * @return местоположение
+     */
+    List<Location> findByCity(String city);
 }

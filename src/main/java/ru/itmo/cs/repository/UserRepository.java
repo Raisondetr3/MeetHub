@@ -9,28 +9,34 @@ import org.springframework.stereotype.Repository;
 import ru.itmo.cs.entity.User;
 
 /**
- * Репозиторий пользователя для обращения к БД.
+ * Репозиторий для работы с пользователями.
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
-  /**
-   * Находит пользователя по имени.
-   *
-   * @param username имя пользователя
-   *
-   * @return пользователь
-   */
-  Optional<User> findByUsername(String username);
 
-  /**
-   * Находит пользователя по причастному мероприятию.
-   *
-   * @param eventId ID мероприятия
-   *
-   * @return пользователь
-   */
-  @Query(
-      "SELECT u FROM User u JOIN Participant p ON u.id = p.id.userId WHERE p.event.id ="
-          + " :eventId")
-  List<User> findParticipantsByEventId(@Param("eventId") Integer eventId);
+    /**
+     * Находит пользователя по логину.
+     *
+     * @param username логин пользователя.
+     * @return найденный пользователь.
+     */
+    Optional<User> findByUsername(String username);
+
+    /**
+     * Находит пользователя по электронной почте.
+     *
+     * @param email электронная почта пользователя.
+     * @return найденный пользователь.
+     */
+    Optional<User> findByEmail(String email);
+
+    /**
+     * Находит пользователей, которые участвуют в указанном мероприятии.
+     *
+     * @param eventId ID мероприятия.
+     * @return список пользователей.
+     */
+    @Query("SELECT u FROM User u "
+            + "JOIN Participant p ON u.id = p.id.userId WHERE p.event.id = :eventId")
+    List<User> findParticipantsByEventId(@Param("eventId") Integer eventId);
 }
