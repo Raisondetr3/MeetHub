@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.itmo.cs.dto.UserCreateDto;
 import ru.itmo.cs.dto.UserDto;
@@ -22,6 +23,8 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final EntityMapper entityMapper;
+    private final PasswordEncoder passwordEncoder;
+
 
     /**
      * Загружает пользователя по имени для аутентификации.
@@ -43,7 +46,7 @@ public class UserService implements UserDetailsService {
      * @return DTO созданного пользователя
      */
     public UserDto registerUser(UserCreateDto dto) {
-        User user = entityMapper.toUserEntity(dto);
+        User user = entityMapper.toUserEntity(dto, passwordEncoder);
         User savedUser = userRepository.save(user);
         return entityMapper.toUserDto(savedUser);
     }

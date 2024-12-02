@@ -12,12 +12,6 @@ import ru.itmo.cs.entity.User;
 @Component
 public class EntityMapper {
 
-    private final PasswordEncoder passwordEncoder;
-
-    public EntityMapper(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
-
     /**
      * Преобразует сущность User в DTO.
      *
@@ -36,9 +30,10 @@ public class EntityMapper {
      * Преобразует DTO для создания пользователя в сущность User.
      *
      * @param dto DTO для создания пользователя
+     * @param passwordEncoder инстанс PasswordEncoder
      * @return сущность User
      */
-    public User toUserEntity(UserCreateDto dto) {
+    public User toUserEntity(UserCreateDto dto, PasswordEncoder passwordEncoder) {
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
