@@ -15,32 +15,29 @@ import ru.itmo.cs.entity.User;
  */
 @Repository
 public interface ParticipantRepository
-    extends JpaRepository<Participant, Participant.ParticipantId> {
-  /**
-   * Находит участника по мероприятию.
-   *
-   * @param event мероприятие, в котором участвовал пользователь
-   *
-   * @return участник
-   */
-  List<Participant> findByEvent(Event event);
+        extends JpaRepository<Participant, Participant.ParticipantId> {
+    /**
+     * Находит участника по мероприятию.
+     *
+     * @param event мероприятие, в котором участвовал пользователь
+     * @return участник
+     */
+    List<Participant> findByEvent(Event event);
 
-  /**
-   * Находит участника по пользователю.
-   *
-   * @param user пользователь, который является участником
-   *
-   * @return участник
-   */
-  List<Participant> findByUser(User user);
+    /**
+     * Находит участника по пользователю.
+     *
+     * @param user пользователь, который является участником
+     * @return участник
+     */
+    List<Participant> findByUser(User user);
 
-  /**
-   * Находит участника по мероприятию как создателя.
-   *
-   * @param event мероприятие, которого создал пользователь
-   *
-   * @return участник
-   */
-  @Query("SELECT p FROM Participant p WHERE p.event = :event AND p.isCreator = true")
-  Optional<Participant> findEventCreator(@Param("event") Event event);
+    /**
+     * Находит участника по мероприятию как создателя.
+     *
+     * @param event мероприятие, которого создал пользователь
+     * @return участник
+     */
+    @Query("SELECT p FROM Participant p WHERE p.event = :event AND p.isCreator = true")
+    Optional<Participant> findEventCreator(@Param("event") Event event);
 }

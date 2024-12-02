@@ -1,5 +1,6 @@
 package ru.itmo.cs.service;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,8 +12,6 @@ import ru.itmo.cs.dto.UserDto;
 import ru.itmo.cs.entity.User;
 import ru.itmo.cs.repository.UserRepository;
 import ru.itmo.cs.util.EntityMapper;
-
-import java.util.Optional;
 
 /**
  * Сервис для работы с пользователями.
@@ -46,6 +45,10 @@ public class UserService implements UserDetailsService {
      * @return DTO созданного пользователя
      */
     public UserDto registerUser(UserCreateDto dto) {
+        if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
+            throw new IllegalStateException("Пользователь с таким именем уже существует");
+        }
+
         User user = entityMapper.toUserEntity(dto, passwordEncoder);
         User savedUser = userRepository.save(user);
         return entityMapper.toUserDto(savedUser);
