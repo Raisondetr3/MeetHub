@@ -50,13 +50,29 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Обрабатывает исключение UserNotFoundException.
+     * Обрабатывает исключение AuthenticationException.
      *
-     * @param ex исключение, выбрасываемое при попытке найти несуществующего пользователя
+     * @param ex исключение, выбрасываемое при ошибке аутентификации
+     * @return ResponseEntity с сообщением об ошибке и статусом 401 Unauthorized
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Object> handleAuthenticationException(AuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+            Map.of(
+                "error", "Unauthorized",
+                "message", "Неверное имя пользователя или пароль"
+            )
+        );
+    }
+
+    /**
+     * Обрабатывает исключение ResourceNotFoundException.
+     *
+     * @param ex исключение, выбрасываемое при попытке найти несуществующий ресурс
      * @return ResponseEntity с сообщением об ошибке и статусом 404 Not Found
      */
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException ex) {
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Object> handleEventNotFoundException(ResourceNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
             Map.of(
                 "error", "Not Found",
@@ -66,18 +82,49 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Обрабатывает исключение AuthenticationException.
+     * Обрабатывает ValidationException.
      *
-     * @param ex исключение, выбрасываемое при ошибке аутентификации
+     * @param ex исключение валидации
+     * @return ResponseEntity с сообщением об ошибке и статусом 400 Bad Request
+     */
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<Object> handleValidationException(ValidationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            Map.of(
+                "error", "Validation Error",
+                "message", ex.getMessage()
+            )
+        );
+    }
+
+    /**
+     * Обрабатывает UnauthorizedException.
+     *
+     * @param ex исключение авторизации
      * @return ResponseEntity с сообщением об ошибке и статусом 401 Unauthorized
      */
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<Object> handleAuthenticationException(AuthenticationException ex) {
-        // 401
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<Object> handleUnauthorizedException(UnauthorizedException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
             Map.of(
                 "error", "Unauthorized",
-                "message", "Неверное имя пользователя или пароль"
+                "message", ex.getMessage()
+            )
+        );
+    }
+
+    /**
+     * Обрабатывает IllegalArgumentException.
+     *
+     * @param ex исключение, выбрасываемое при неправильных аргументах
+     * @return ResponseEntity с сообщением об ошибке и статусом 400 Bad Request
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            Map.of(
+                "error", "Invalid Argument",
+                "message", ex.getMessage()
             )
         );
     }

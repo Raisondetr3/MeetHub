@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -18,8 +17,8 @@ import ru.itmo.cs.dto.auth.LoginRequestDto;
 import ru.itmo.cs.dto.auth.UserCreateDto;
 import ru.itmo.cs.dto.auth.UserDto;
 import ru.itmo.cs.entity.User;
+import ru.itmo.cs.exception.ResourceNotFoundException;
 import ru.itmo.cs.exception.UserAlreadyExistsException;
-import ru.itmo.cs.exception.UserNotFoundException;
 import ru.itmo.cs.repository.UserRepository;
 import ru.itmo.cs.service.JwtService;
 import ru.itmo.cs.service.UserService;
@@ -154,8 +153,8 @@ class UserServiceTest {
         when(userRepository.findById(1)).thenReturn(Optional.empty());
 
         // Act & Assert
-        UserNotFoundException exception = assertThrows(
-                UserNotFoundException.class,
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
                 () -> userService.findById(1),
                 "Должно быть выброшено исключение при отсутствии пользователя"
         );
@@ -188,8 +187,8 @@ class UserServiceTest {
         when(userRepository.findByUsername("nonExistentUser")).thenReturn(Optional.empty());
 
         // Act & Assert
-        UserNotFoundException exception = assertThrows(
-                UserNotFoundException.class,
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
                 () -> userService.findByUsername("nonExistentUser"),
                 "Должно быть выброшено исключение при отсутствии пользователя"
         );
