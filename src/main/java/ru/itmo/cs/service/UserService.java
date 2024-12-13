@@ -2,7 +2,10 @@ package ru.itmo.cs.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,6 +90,14 @@ public class UserService {
         return userRepository.findByUsername(username)
             .map(entityMapper::toUserDto)
             .orElseThrow(() -> new ResourceNotFoundException("Пользователь с именем " + username + " не найден"));
+    }
+
+    @Transactional
+    public User me() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return userRepository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + username));
     }
 }
 

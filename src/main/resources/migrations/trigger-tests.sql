@@ -97,3 +97,17 @@ SELECT * FROM Participant WHERE event_id = (SELECT id FROM Event WHERE name = 'U
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

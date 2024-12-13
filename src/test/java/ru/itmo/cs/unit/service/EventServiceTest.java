@@ -13,21 +13,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import org.springframework.transaction.annotation.Transactional;
 import ru.itmo.cs.dto.category.CategoryDto;
 import ru.itmo.cs.dto.event.EventDto;
-import ru.itmo.cs.dto.event.EventFilterCriteria;
 import ru.itmo.cs.dto.venue.VenueDto;
 import ru.itmo.cs.entity.*;
 import ru.itmo.cs.exception.ResourceNotFoundException;
 import ru.itmo.cs.exception.UnauthorizedException;
 import ru.itmo.cs.exception.ValidationException;
 import ru.itmo.cs.repository.EventRepository;
-import ru.itmo.cs.repository.LocationRepository;
 import ru.itmo.cs.service.*;
 import ru.itmo.cs.util.EntityMapper;
-import ru.itmo.cs.util.filter.FilterProcessor;
-import ru.itmo.cs.util.pagination.PaginationHandler;
-
 
 @ExtendWith(MockitoExtension.class)
 class EventServiceTest {
@@ -40,13 +36,6 @@ class EventServiceTest {
 
     @Mock
     private EntityMapper entityMapper;
-
-    @Mock
-    private FilterProcessor<EventDto, EventFilterCriteria> eventFilterProcessor;
-
-    @Mock
-    private PaginationHandler paginationHandler;
-
     @Mock
     private ParticipantService participantService;
 
@@ -258,6 +247,48 @@ class EventServiceTest {
         verify(eventRepository).findById(1);
         verify(participantService).validateOrganizer(1, testUser.getId());
         verify(eventRepository).delete(testEvent);
+    }
+
+    @Test
+    @DisplayName("Ошибка при создании мероприятия с датой в прошлом")
+    void createEvent_ShouldThrowExceptionWhenDateIsInThePast() {
+        // Arrange
+        testEventDto.setDate(LocalDateTime.now().minusDays(1)); // Устанавливаем дату в прошлом
+
+        VenueDto venueDto = new VenueDto();
+        venueDto.setId(1);
+        testEventDto.setVenue(venueDto);
+
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setName("CONFERENCE");
+        testEventDto.setCategory(categoryDto);
+
+        Venue venue = new Venue();
+        venue.setId(1);
+        venue.setCapacity(100);
+
+        when(venueService.getVenueById(1)).thenReturn(venue);
+        when(categoryService.getCategoryByName(CategoryEnum.CONFERENCE))
+            .thenReturn(new Category(1, CategoryEnum.CONFERENCE));
+
+        when(entityMapper.toEventEntity(any(EventDto.class), any(Venue.class), any(Category.class), anyList()))
+            .thenReturn(testEvent);
+
+        when(eventRepository.save(any(Event.class)))
+            .thenThrow(new RuntimeException("Event date cannot be in the past"));
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(
+            RuntimeException.class,
+            () -> eventService.createEvent(testEventDto, testUser),
+            "Expected exception when event date is in the past"
+        );
+        assertEquals("Event date cannot be in the past", exception.getMessage());
+
+        // Verify mocks
+        verify(venueService).getVenueById(1);
+        verify(categoryService).getCategoryByName(CategoryEnum.CONFERENCE);
+        verify(eventRepository).save(any(Event.class));
     }
 }
 

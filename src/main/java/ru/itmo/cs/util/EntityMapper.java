@@ -11,6 +11,8 @@ import ru.itmo.cs.dto.food.FoodDto;
 import ru.itmo.cs.dto.location.LocationDto;
 import ru.itmo.cs.dto.notification.NotificationDto;
 import ru.itmo.cs.dto.participant.ParticipantDto;
+import ru.itmo.cs.dto.review.ReviewDto;
+import ru.itmo.cs.dto.ticket.TicketDto;
 import ru.itmo.cs.dto.venue.VenueDto;
 import ru.itmo.cs.entity.*;
 
@@ -97,6 +99,25 @@ public class EntityMapper {
     }
 
     /**
+     * Преобразует сущность Ticket в TicketDto.
+     *
+     * @param ticket сущность билета
+     * @return DTO билета
+     */
+    public TicketDto toTicketDto(Ticket ticket) {
+        if (ticket == null) {
+            return null;
+        }
+
+        TicketDto ticketDto = new TicketDto();
+        ticketDto.setId(ticket.getId());
+        ticketDto.setSeatNumber(ticket.getSeatNumber());
+        ticketDto.setEventId(ticket.getEvent().getId());
+        ticketDto.setUserId(ticket.getUser().getId());
+        return ticketDto;
+    }
+
+    /**
      * Преобразует сущность Food в FoodDto.
      *
      * @param food сущность Food
@@ -142,6 +163,25 @@ public class EntityMapper {
                 notification.getContent(),
                 notification.getStatus(),
                 notification.getSentAt()
+        );
+    }
+
+    /**
+     * Преобразует сущность отзыва в DTO.
+     *
+     * @param review сущность отзыва
+     * @return DTO отзыва
+     */
+    public ReviewDto toReviewDto(Review review) {
+        return new ReviewDto(
+                review.getId(),
+                review.getUser().getId(),
+                review.getUser().getUsername(),
+                review.getEvent().getId(),
+                review.getEvent().getName(),
+                review.getRating(),
+                review.getComment(),
+                review.getCreatedAt()
         );
     }
 
@@ -193,6 +233,23 @@ public class EntityMapper {
         event.setCategory(category);
         event.setFood(food);
         return event;
+    }
+
+    /**
+     * Преобразует DTO TicketDto в сущность Ticket.
+     *
+     * @param ticketDto DTO билета
+     * @param event     сущность мероприятия
+     * @param user      сущность пользователя
+     * @return сущность билета
+     */
+    public Ticket toTicketEntity(TicketDto ticketDto, Event event, User user) {
+        Ticket ticket = new Ticket();
+        ticket.setId(ticketDto.getId());
+        ticket.setSeatNumber(ticketDto.getSeatNumber());
+        ticket.setEvent(event);
+        ticket.setUser(user);
+        return ticket;
     }
 
     /**
@@ -289,5 +346,24 @@ public class EntityMapper {
         notification.setStatus(dto.getStatus());
         notification.setSentAt(dto.getSentAt());
         return notification;
+    }
+
+    /**
+     * Преобразует DTO отзыва в сущность.
+     *
+     * @param reviewDto DTO отзыва
+     * @param user пользователь, оставивший отзыв
+     * @param event мероприятие, к которому относится отзыв
+     * @return сущность отзыва
+     */
+    public Review toReviewEntity(ReviewDto reviewDto, User user, Event event) {
+        Review review = new Review();
+        review.setId(reviewDto.getId());
+        review.setUser(user);
+        review.setEvent(event);
+        review.setRating(reviewDto.getRating());
+        review.setComment(reviewDto.getComment());
+        review.setCreatedAt(reviewDto.getCreatedAt());
+        return review;
     }
 }

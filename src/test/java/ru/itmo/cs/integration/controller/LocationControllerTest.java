@@ -15,7 +15,6 @@ import ru.itmo.cs.dto.location.LocationDto;
 import ru.itmo.cs.integration.IntegrationTestBase;
 import ru.itmo.cs.repository.*;
 
-import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;

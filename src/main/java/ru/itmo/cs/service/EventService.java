@@ -169,9 +169,9 @@ public class EventService {
         }
 
         Venue venue = venueService.getVenueById(eventDto.getVenue().getId());
-        if (venue.getCapacity() < 1 || venue.getCapacity() > 500) {
-            throw new ValidationException("Вместимость мероприятия должна быть от 1 до 500.");
-        }
+//        if (venue.getCapacity() < 1 || venue.getCapacity() > 500) {
+//            throw new ValidationException("Вместимость мероприятия должна быть от 1 до 500.");
+//        }
 
         CategoryEnum categoryEnum = CategoryEnum.valueOf(eventDto.getCategory().getName().toUpperCase());
         Category category = categoryService.getCategoryByName(categoryEnum);
@@ -188,7 +188,7 @@ public class EventService {
         }
 
         Event event = entityMapper.toEventEntity(eventDto, venue, category, food);
-        event.setUpdatedAt(LocalDateTime.now());
+//        event.setUpdatedAt(LocalDateTime.now());
 
         Event savedEvent = eventRepository.save(event);
 
