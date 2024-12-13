@@ -1,12 +1,15 @@
 package ru.itmo.cs.exception;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * Глобальный обработчик исключений для приложения.
@@ -127,5 +130,22 @@ public class GlobalExceptionHandler {
                 "message", ex.getMessage()
             )
         );
+    }
+
+    /**
+     * Обрабатывает исключения валидации, возникающие при некорректных данных в запросе.
+     *
+     * @param ex исключение MethodArgumentNotValidException, содержащее детали ошибок валидации
+     * @return карта с ошибками, где ключ — имя поля, а значение — сообщение об ошибке
+     * @see MethodArgumentNotValidException
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            errors.put(error.getField(), error.getDefaultMessage());
+        });
+        return errors;
     }
 }

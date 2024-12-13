@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import ru.itmo.cs.dto.location.LocationDto;
 
 /**
  * DTO для представления места проведения мероприятий.
@@ -24,5 +26,5 @@ public class VenueDto {
     private Integer capacity;
 
     @Schema(description = "Местоположение", example = "Москва, ул. Ленина, 12")
-    private String location;
+    private LocationDto location;
 }

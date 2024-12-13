@@ -30,4 +30,3 @@ public class CategoryService {
             .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
     }
 }
-

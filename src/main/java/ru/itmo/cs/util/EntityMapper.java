@@ -8,6 +8,8 @@ import ru.itmo.cs.dto.auth.UserDto;
 import ru.itmo.cs.dto.category.CategoryDto;
 import ru.itmo.cs.dto.event.EventDto;
 import ru.itmo.cs.dto.food.FoodDto;
+import ru.itmo.cs.dto.location.LocationDto;
+import ru.itmo.cs.dto.notification.NotificationDto;
 import ru.itmo.cs.dto.participant.ParticipantDto;
 import ru.itmo.cs.dto.venue.VenueDto;
 import ru.itmo.cs.entity.*;
@@ -61,7 +63,23 @@ public class EntityMapper {
             venue.getId(),
             venue.getName(),
             venue.getCapacity(),
-            venue.getLocation().getAddress()
+            toLocationDto(venue.getLocation())
+        );
+    }
+
+    /**
+     * Преобразует сущность Location в DTO LocationDto.
+     *
+     * @param location объект Location
+     * @return объект LocationDto
+     */
+    public LocationDto toLocationDto(Location location) {
+        return new LocationDto(
+                location.getId(),
+                location.getCountry(),
+                location.getRegion(),
+                location.getCity(),
+                location.getAddress()
         );
     }
 
@@ -107,6 +125,25 @@ public class EntityMapper {
         );
     }
 
+    /**
+     * Преобразует Notification в NotificationDto.
+     *
+     * @param notification объект Notification
+     * @return объект NotificationDto
+     */
+    public NotificationDto toNotificationDto(Notification notification) {
+        return new NotificationDto(
+                notification.getId(),
+                notification.getUser().getId(),
+                notification.getUser().getUsername(),
+                notification.getUser().getEmail(),
+                notification.getEvent().getId(),
+                notification.getEvent().getName(),
+                notification.getContent(),
+                notification.getStatus(),
+                notification.getSentAt()
+        );
+    }
 
     /**
      * Преобразует DTO для создания пользователя в сущность User.
@@ -115,11 +152,25 @@ public class EntityMapper {
      * @param passwordEncoder инстанс PasswordEncoder
      * @return сущность User
      */
-    public User toUserEntity(UserCreateDto dto, PasswordEncoder passwordEncoder) {
+    public User toUserCreateEntity(UserCreateDto dto, PasswordEncoder passwordEncoder) {
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        return user;
+    }
+
+    /**
+     * Преобразует UserDto в сущность User.
+     *
+     * @param userDto DTO пользователя
+     * @return сущность User
+     */
+    public User toUserEntity(UserDto userDto) {
+        User user = new User();
+        user.setId(userDto.getId());
+        user.setUsername(userDto.getUsername());
+        user.setEmail(userDto.getEmail());
         return user;
     }
 
@@ -159,6 +210,52 @@ public class EntityMapper {
     }
 
     /**
+     * Преобразует DTO Venue в сущность Venue.
+     *
+     * @param dto      объект VenueDto
+     * @param location объект Location
+     * @return объект Venue
+     */
+    public Venue toVenueEntity(VenueDto dto, Location location) {
+        Venue venue = new Venue();
+        venue.setId(dto.getId());
+        venue.setName(dto.getName());
+        venue.setCapacity(dto.getCapacity());
+        venue.setLocation(location);
+        return venue;
+    }
+
+
+    /**
+     * Преобразует DTO Location в сущность Location.
+     *
+     * @param dto объект LocationDto
+     * @return объект Location
+     */
+    public Location toLocationEntity(LocationDto dto) {
+        Location location = new Location();
+        location.setId(dto.getId());
+        location.setCountry(dto.getCountry());
+        location.setRegion(dto.getRegion());
+        location.setCity(dto.getCity());
+        location.setAddress(dto.getAddress());
+        return location;
+    }
+
+    /**
+     * Преобразует DTO Category в сущность Category.
+     *
+     * @param dto объект CategoryDto
+     * @return объект Category
+     */
+    public Category toCategoryEntity(CategoryDto dto) {
+        Category category = new Category();
+        category.setId(dto.getId());
+        category.setName(CategoryEnum.valueOf(dto.getName().toUpperCase()));
+        return category;
+    }
+
+    /**
      * Преобразует ParticipantDto в Participant.
      *
      * @param dto   DTO участника
@@ -173,5 +270,24 @@ public class EntityMapper {
             event,
             dto.getIsCreator()
         );
+    }
+
+    /**
+     * Преобразует NotificationDto в Notification.
+     *
+     * @param dto объект NotificationDto
+     * @param user объект User
+     * @param event объект Event
+     * @return объект Notification
+     */
+    public Notification toNotificationEntity(NotificationDto dto, User user, Event event) {
+        Notification notification = new Notification();
+        notification.setId(dto.getId());
+        notification.setUser(user);
+        notification.setEvent(event);
+        notification.setContent(dto.getContent());
+        notification.setStatus(dto.getStatus());
+        notification.setSentAt(dto.getSentAt());
+        return notification;
     }
 }

@@ -1,6 +1,8 @@
 package ru.itmo.cs.service;
 
 import java.util.List;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -113,7 +115,13 @@ public class ParticipantService {
         return participantRepository.save(organizer);
     }
 
+    /**
+     * Находит организатора мероприятия.
+     *
+     * @param event мероприятие
+     * @return объект Participant (организатор)
+     */
+    public Optional<Participant> findEventCreator(Event event) {
+        return participantRepository.findEventCreator(event);
+    }
 }
-
-
-

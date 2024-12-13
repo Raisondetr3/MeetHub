@@ -11,16 +11,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 import ru.itmo.cs.entity.*;
 import ru.itmo.cs.integration.IntegrationTestBase;
 import ru.itmo.cs.repository.*;
 
-@Transactional
 @Rollback
+@DataJpaTest
 class ParticipantRepositoryTest extends IntegrationTestBase {
 
     @Autowired
@@ -77,7 +77,7 @@ class ParticipantRepositoryTest extends IntegrationTestBase {
     void testFindParticipantsByEvent() {
         participantRepository.save(defaultParticipant);
 
-        List<Participant> participants = participantRepository.findByEvent(defaultEvent);
+        List<Participant> participants = participantRepository.findByEventId(defaultEvent.getId());
 
         assertThat(participants).hasSize(1);
         assertThat(participants.get(0).getEvent()).isEqualTo(defaultEvent);
@@ -88,7 +88,7 @@ class ParticipantRepositoryTest extends IntegrationTestBase {
     void testFindParticipantsByUser() {
         participantRepository.save(defaultParticipant);
 
-        List<Participant> participants = participantRepository.findByUser(defaultUser);
+        List<Participant> participants = participantRepository.findByUserId(defaultUser.getId());
 
         assertThat(participants).hasSize(1);
         assertThat(participants.get(0).getUser()).isEqualTo(defaultUser);

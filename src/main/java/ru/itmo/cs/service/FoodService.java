@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itmo.cs.dto.food.FoodDto;
+import ru.itmo.cs.entity.Event;
 import ru.itmo.cs.entity.Food;
 import ru.itmo.cs.entity.User;
 import ru.itmo.cs.exception.ResourceNotFoundException;
@@ -46,10 +47,12 @@ public class FoodService {
      * @return DTO созданного блюда
      */
     public FoodDto createFood(FoodDto foodDto, User user, Integer eventId) {
+        participantService.validateOrganizer(eventId, user.getId());
         Food food = entityMapper.toFoodEntity(foodDto);
         Food savedFood = foodRepository.save(food);
         return entityMapper.toFoodDto(savedFood);
     }
+
 
     /**
      * Возвращает список всех блюд.
@@ -107,10 +110,14 @@ public class FoodService {
     public void deleteFood(Integer id, User user, Integer eventId) {
         participantService.validateOrganizer(eventId, user.getId());
 
-        if (!foodRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Food not found with ID: " + id);
+        Food food = foodRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Food not found with ID: " + id));
+
+        for (Event event : food.getEvents()) {
+            event.getFood().remove(food);
         }
-        foodRepository.deleteById(id);
+
+        foodRepository.delete(food);
     }
 
     /**
@@ -127,6 +134,3 @@ public class FoodService {
             .toList();
     }
 }
-
-
-

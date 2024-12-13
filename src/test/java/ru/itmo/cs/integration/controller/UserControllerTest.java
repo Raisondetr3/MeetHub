@@ -1,6 +1,5 @@
 package ru.itmo.cs.integration.controller;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,8 +37,6 @@ class UserControllerTest extends IntegrationTestBase {
     @Autowired
     private UserRepository userRepository;
 
-    @MockBean
-    private JwtService jwtService;
 
     @MockBean
     private PasswordEncoder passwordEncoder;

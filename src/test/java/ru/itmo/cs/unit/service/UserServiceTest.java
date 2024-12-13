@@ -52,7 +52,7 @@ class UserServiceTest {
         UserDto expectedDto = new UserDto(1, createDto.getUsername(), createDto.getEmail());
 
         when(userRepository.findByUsername(createDto.getUsername())).thenReturn(Optional.empty());
-        when(entityMapper.toUserEntity(eq(createDto), any())).thenReturn(user);
+        when(entityMapper.toUserCreateEntity(eq(createDto), any())).thenReturn(user);
         when(userRepository.save(user)).thenReturn(savedUser);
         when(entityMapper.toUserDto(savedUser)).thenReturn(expectedDto);
         when(jwtService.generateToken(createDto.getUsername())).thenReturn("token");
@@ -158,7 +158,7 @@ class UserServiceTest {
                 () -> userService.findById(1),
                 "Должно быть выброшено исключение при отсутствии пользователя"
         );
-        assertEquals("Пользователь с ID 1 не найден", exception.getMessage());
+        assertEquals("Пользователь не найден", exception.getMessage());
     }
 
     @Test
@@ -195,4 +195,3 @@ class UserServiceTest {
         assertEquals("Пользователь с именем nonExistentUser не найден", exception.getMessage());
     }
 }
-

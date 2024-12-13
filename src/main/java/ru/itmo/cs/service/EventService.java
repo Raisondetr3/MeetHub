@@ -2,6 +2,7 @@ package ru.itmo.cs.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.itmo.cs.dto.event.EventDto;
 import ru.itmo.cs.dto.event.EventFilterCriteria;
 import ru.itmo.cs.dto.food.FoodDto;
+import ru.itmo.cs.dto.notification.NotificationDto;
 import ru.itmo.cs.dto.participant.ParticipantDto;
 import ru.itmo.cs.entity.*;
 import ru.itmo.cs.exception.ResourceNotFoundException;
@@ -74,10 +76,24 @@ public class EventService {
      * @return DTO мероприятия
      */
     public EventDto getEventById(Integer eventId) {
-        Event event = eventRepository.findByIdWithFood(eventId)
-            .orElseThrow(() -> new ResourceNotFoundException("Event not found: " + eventId));
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException("Мероприятие не найдено"));
         return entityMapper.toEventDto(event);
     }
+
+
+    /**
+     * Возвращает мероприятие с едой по его ID.
+     *
+     * @param eventId идентификатор мероприятия
+     * @return DTO мероприятия
+     */
+    public EventDto getEventByIdWithFood(Integer eventId) {
+        Event event = eventRepository.findByIdWithFood(eventId)
+                .orElseThrow(() -> new ResourceNotFoundException("Event with food not found: " + eventId));
+        return entityMapper.toEventDto(event);
+    }
+
 
     /**
      * Регистрирует пользователя на мероприятие с подтверждением через email.
@@ -101,11 +117,21 @@ public class EventService {
         );
         participantService.registerParticipant(participant);
 
-        Notification notification = new Notification();
-        notification.setEvent(event);
-        notification.setUser(user);
-        notification.setContent("You have successfully registered for the event: " + event.getName());
-        notificationService.createNotification(notification);
+        String content = "Вы успешно зарегистрировались на мероприятие: " + event.getName();
+        NotificationDto notificationDto = new NotificationDto(
+            null,
+            user.getId(),
+            user.getUsername(),
+            user.getEmail(),
+            eventId,
+            event.getName(),
+            content,
+            "SENT",
+            new Date()
+        );
+
+        notificationService.createNotification(notificationDto, user, event);
+
     }
 
     /**
@@ -306,5 +332,3 @@ public class EventService {
         eventRepository.delete(event);
     }
 }
-
-

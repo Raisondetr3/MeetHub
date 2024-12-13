@@ -41,7 +41,7 @@ public class UserService {
             throw new UserAlreadyExistsException("Пользователь с таким именем уже существует");
         }
 
-        User user = entityMapper.toUserEntity(dto, passwordEncoder);
+        User user = entityMapper.toUserCreateEntity(dto, passwordEncoder);
         User savedUser = userRepository.save(user);
         UserDto registeredUser = entityMapper.toUserDto(savedUser);
 
@@ -79,7 +79,7 @@ public class UserService {
     public UserDto findById(Integer id) {
         return userRepository.findById(id)
             .map(entityMapper::toUserDto)
-            .orElseThrow(() -> new ResourceNotFoundException("Пользователь с ID " + id + " не найден"));
+            .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден"));
     }
 
     @Transactional(readOnly = true)
