@@ -11,10 +11,18 @@ import ru.itmo.cs.entity.Food;
 @Repository
 public interface FoodRepository extends JpaRepository<Food, Integer> {
     /**
-     * Находит еду по его названию без учёта регистров.
+     * Находит блюда по их названию (без учета регистра).
      *
-     * @param name название еды
-     * @return еда
+     * @param name название блюда
+     * @return список блюд
      */
     List<Food> findByNameContainingIgnoreCase(String name);
+
+    /**
+     * Проверяет существование блюда по названию (без учета регистра).
+     *
+     * @param name название блюда
+     * @return true, если блюдо существует
+     */
+    boolean existsByNameIgnoreCase(String name);
 }

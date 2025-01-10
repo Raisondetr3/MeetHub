@@ -2,24 +2,22 @@ package ru.itmo.cs.integration.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 import ru.itmo.cs.entity.*;
 import ru.itmo.cs.integration.IntegrationTestBase;
 import ru.itmo.cs.repository.*;
 
-@Transactional
 @Rollback
+@DataJpaTest
 class NotificationRepositoryTest extends IntegrationTestBase {
 
     @Autowired
@@ -52,6 +50,8 @@ class NotificationRepositoryTest extends IntegrationTestBase {
         defaultNotification.setUser(defaultUser);
         defaultNotification.setEvent(defaultEvent);
         defaultNotification.setContent("Test notification content");
+        defaultNotification.setStatus("SENT");
+        defaultNotification.setSentAt(new Date());
     }
 
     @Test
@@ -64,6 +64,7 @@ class NotificationRepositoryTest extends IntegrationTestBase {
         assertThat(savedNotification.getUser()).isEqualTo(defaultUser);
         assertThat(savedNotification.getEvent()).isEqualTo(defaultEvent);
         assertThat(savedNotification.getContent()).isEqualTo("Test notification content");
+        assertThat(savedNotification.getStatus()).isEqualTo("SENT");
     }
 
     @Test
@@ -71,7 +72,7 @@ class NotificationRepositoryTest extends IntegrationTestBase {
     void testFindNotificationsByUser() {
         notificationRepository.save(defaultNotification);
 
-        List<Notification> notifications = notificationRepository.findByUser(defaultUser);
+        List<Notification> notifications = notificationRepository.findByUserId(defaultUser.getId());
 
         assertThat(notifications).hasSize(1);
         assertThat(notifications.get(0).getUser()).isEqualTo(defaultUser);
@@ -82,35 +83,11 @@ class NotificationRepositoryTest extends IntegrationTestBase {
     void testFindNotificationsByEvent() {
         notificationRepository.save(defaultNotification);
 
-        List<Notification> notifications = notificationRepository.findByEvent(defaultEvent);
+        List<Notification> notifications = notificationRepository.findByEventId(defaultEvent.getId());
 
         assertThat(notifications).hasSize(1);
         assertThat(notifications.get(0).getEvent()).isEqualTo(defaultEvent);
     }
-
-    @Test
-    @DisplayName("Should find Notifications by User ordered by sent date descending")
-    void testFindNotificationsByUserOrderedBySentAt() {
-        Notification earlierNotification = new Notification();
-        earlierNotification.setUser(defaultUser);
-        earlierNotification.setEvent(defaultEvent);
-        earlierNotification.setContent("Earlier notification content");
-        earlierNotification.setSentAt(new Date(1000));
-
-        notificationRepository.saveAndFlush(earlierNotification);
-
-        defaultNotification.setSentAt(new Date(2000));
-        notificationRepository.saveAndFlush(defaultNotification);
-
-        List<Notification> notifications =
-            notificationRepository.findByUserOrderBySentAtDesc(defaultUser);
-
-
-        assertThat(notifications).hasSize(2);
-        assertThat(notifications.get(0).getContent()).isEqualTo("Test notification content");
-        assertThat(notifications.get(1).getContent()).isEqualTo("Earlier notification content");
-    }
-
 
     @Test
     @DisplayName("Should not save Notification without User")

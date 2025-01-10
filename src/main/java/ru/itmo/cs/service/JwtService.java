@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 @Setter
 public class JwtService {
 
+    @Getter
     @Value("${security.jwt.secret-key}")
     private String secretKey;
 

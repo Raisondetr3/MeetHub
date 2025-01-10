@@ -9,10 +9,18 @@ import org.springframework.stereotype.Repository;
 import ru.itmo.cs.entity.User;
 
 /**
- * Репозиторий для работы с пользователями.
+ * Репозиторий пользователя для обращения к БД.
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
+
+    /**
+     * Находит пользователя по логину.
+     *
+     * @param id логин пользователя.
+     * @return найденный пользователь.
+     */
+    Optional<User> findById(Integer id);
 
     /**
      * Находит пользователя по логину.

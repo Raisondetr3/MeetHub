@@ -44,6 +44,9 @@ public class Notification {
     @Column(nullable = false)
     private String content;
 
+    @Column(nullable = false, length = 10)
+    private String status = "SENT";
+
     @Column(name = "sent_at", nullable = false, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp

@@ -10,17 +10,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 import ru.itmo.cs.entity.Location;
 import ru.itmo.cs.entity.Venue;
 import ru.itmo.cs.integration.IntegrationTestBase;
 import ru.itmo.cs.repository.LocationRepository;
 import ru.itmo.cs.repository.VenueRepository;
 
-@Transactional
 @Rollback
+@DataJpaTest
 class VenueRepositoryTest extends IntegrationTestBase {
 
     @Autowired

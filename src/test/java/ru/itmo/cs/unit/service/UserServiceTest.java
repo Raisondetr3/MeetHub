@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -18,8 +17,8 @@ import ru.itmo.cs.dto.auth.LoginRequestDto;
 import ru.itmo.cs.dto.auth.UserCreateDto;
 import ru.itmo.cs.dto.auth.UserDto;
 import ru.itmo.cs.entity.User;
+import ru.itmo.cs.exception.ResourceNotFoundException;
 import ru.itmo.cs.exception.UserAlreadyExistsException;
-import ru.itmo.cs.exception.UserNotFoundException;
 import ru.itmo.cs.repository.UserRepository;
 import ru.itmo.cs.service.JwtService;
 import ru.itmo.cs.service.UserService;
@@ -53,7 +52,7 @@ class UserServiceTest {
         UserDto expectedDto = new UserDto(1, createDto.getUsername(), createDto.getEmail());
 
         when(userRepository.findByUsername(createDto.getUsername())).thenReturn(Optional.empty());
-        when(entityMapper.toUserEntity(eq(createDto), any())).thenReturn(user);
+        when(entityMapper.toUserCreateEntity(eq(createDto), any())).thenReturn(user);
         when(userRepository.save(user)).thenReturn(savedUser);
         when(entityMapper.toUserDto(savedUser)).thenReturn(expectedDto);
         when(jwtService.generateToken(createDto.getUsername())).thenReturn("token");
@@ -154,12 +153,12 @@ class UserServiceTest {
         when(userRepository.findById(1)).thenReturn(Optional.empty());
 
         // Act & Assert
-        UserNotFoundException exception = assertThrows(
-                UserNotFoundException.class,
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
                 () -> userService.findById(1),
                 "Должно быть выброшено исключение при отсутствии пользователя"
         );
-        assertEquals("Пользователь с ID 1 не найден", exception.getMessage());
+        assertEquals("Пользователь не найден", exception.getMessage());
     }
 
     @Test
@@ -188,12 +187,11 @@ class UserServiceTest {
         when(userRepository.findByUsername("nonExistentUser")).thenReturn(Optional.empty());
 
         // Act & Assert
-        UserNotFoundException exception = assertThrows(
-                UserNotFoundException.class,
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
                 () -> userService.findByUsername("nonExistentUser"),
                 "Должно быть выброшено исключение при отсутствии пользователя"
         );
         assertEquals("Пользователь с именем nonExistentUser не найден", exception.getMessage());
     }
 }
-

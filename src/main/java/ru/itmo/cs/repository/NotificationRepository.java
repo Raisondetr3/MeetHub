@@ -2,37 +2,41 @@ package ru.itmo.cs.repository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import ru.itmo.cs.entity.Event;
 import ru.itmo.cs.entity.Notification;
-import ru.itmo.cs.entity.User;
 
 /**
- * Репозиторий уведомления для обращения к БД.
+ * Репозиторий уведомления для работы с БД.
  */
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Integer> {
-    /**
-     * Находит уведомление по пользователю.
-     *
-     * @param user пользователь, к которому отправлено уведомления
-     * @return уведомление
-     */
-    List<Notification> findByUser(User user);
 
     /**
-     * Находит уведомление по мероприятию.
+     * Находит уведомления по ID пользователя.
      *
-     * @param event мероприятие, с которым связано уведомления
-     * @return уведомление
+     * @param userId ID пользователя
+     * @return список уведомлений
      */
-    List<Notification> findByEvent(Event event);
+    @Query("SELECT n FROM Notification n WHERE n.user.id = :userId")
+    List<Notification> findByUserId(@Param("userId") Integer userId);
 
     /**
-     * Находит последнее уведомление по пользователю.
+     * Находит уведомления по ID мероприятия.
      *
-     * @param user пользователь, к которому отправлено уведомления
-     * @return уведомление
+     * @param eventId ID мероприятия
+     * @return список уведомлений
      */
-    List<Notification> findByUserOrderBySentAtDesc(User user);
+    @Query("SELECT n FROM Notification n WHERE n.event.id = :eventId")
+    List<Notification> findByEventId(@Param("eventId") Integer eventId);
+
+    /**
+     * Находит последние уведомления пользователя, отсортированные по дате отправки.
+     *
+     * @param userId ID пользователя
+     * @return список уведомлений
+     */
+    @Query("SELECT n FROM Notification n WHERE n.user.id = :userId ORDER BY n.sentAt DESC")
+    List<Notification> findLatestByUserId(@Param("userId") Integer userId);
 }

@@ -1,18 +1,33 @@
 package ru.itmo.cs;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
+import ru.itmo.cs.service.JwtService;
+
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 @SpringBootTest
 @ActiveProfiles("test")
 class MeetHubTest {
 
-//    @BeforeAll
-//    public static void loadEnv() {
-//        Dotenv dotenv = Dotenv.configure().load();
-//        dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
-//    }
+    @MockBean
+    private JwtService jwtService;
+
+    @BeforeEach
+    void setUpMocks() {
+        when(jwtService.getSecretKey()).thenReturn("H++QPACG3PMKlsKILieJCXpW0DrJUMpiPTcU/KosFYU=");
+        when(jwtService.getJwtExpiration()).thenReturn(3600000L);
+//        doNothing().when(mailSender).send(any(SimpleMailMessage.class));
+    }
 
     @BeforeAll
     public static void setUp() {
@@ -22,11 +37,15 @@ class MeetHubTest {
         System.setProperty("spring.datasource.password", "");
         System.setProperty("spring.datasource.driver-class-name", "org.h2.Driver");
 
+        // Hibernate dialect for H2 emulating PostgreSQL
+        System.setProperty("spring.jpa.properties.hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+
         // JWT configuration
         System.setProperty("security.jwt.secret-key", "H++QPACG3PMKlsKILieJCXpW0DrJUMpiPTcU/KosFYU=");
         System.setProperty("security.jwt.expiration-time", "3600000");
     }
 
-  @Test
-  void contextLoads() {}
+    @Test
+    void contextLoads() {
+    }
 }

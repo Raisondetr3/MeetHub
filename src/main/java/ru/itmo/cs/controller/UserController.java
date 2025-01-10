@@ -6,6 +6,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.itmo.cs.dto.auth.AuthResponseDto;
 import ru.itmo.cs.dto.auth.LoginRequestDto;
 import ru.itmo.cs.dto.auth.UserCreateDto;
+import ru.itmo.cs.entity.User;
 import ru.itmo.cs.service.UserService;
 
 /**
@@ -59,4 +63,9 @@ public class UserController {
     public ResponseEntity<AuthResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
         return ResponseEntity.ok(userService.login(loginRequestDto));
     }
+
+    public User getCurrentUser() {
+        return userService.me();
+    }
+
 }

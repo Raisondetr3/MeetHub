@@ -32,7 +32,6 @@ public class Venue {
     @Column(nullable = false, length = 100)
     private String name;
 
-    // Внешний ключ теперь в "venue"
     @OneToOne
     @JoinColumn(name = "location_id", nullable = false, unique = true)
     private Location location;

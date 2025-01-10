@@ -9,11 +9,8 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+
+import lombok.*;
 
 /**
  * Еда.
@@ -38,4 +35,15 @@ public class Food {
 
     @Column(columnDefinition = "TEXT")
     private String composition;
+
+    /**
+     * Конструктор с параметрами name и composition.
+     *
+     * @param name название блюда
+     * @param composition состав блюда
+     */
+    public Food(String name, String composition) {
+        this.name = name;
+        this.composition = composition;
+    }
 }

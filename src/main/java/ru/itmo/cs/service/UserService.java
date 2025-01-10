@@ -2,16 +2,20 @@ package ru.itmo.cs.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.itmo.cs.dto.auth.AuthResponseDto;
 import ru.itmo.cs.dto.auth.LoginRequestDto;
 import ru.itmo.cs.dto.auth.UserCreateDto;
 import ru.itmo.cs.dto.auth.UserDto;
 import ru.itmo.cs.entity.User;
+import ru.itmo.cs.exception.ResourceNotFoundException;
 import ru.itmo.cs.exception.UserAlreadyExistsException;
-import ru.itmo.cs.exception.UserNotFoundException;
 import ru.itmo.cs.repository.UserRepository;
 import ru.itmo.cs.util.EntityMapper;
 
@@ -34,12 +38,13 @@ public class UserService {
      * @return DTO с токеном, временем истечения и данными пользователя
      * @throws UserAlreadyExistsException если пользователь с таким именем уже существует
      */
+    @Transactional
     public AuthResponseDto register(UserCreateDto dto) {
         if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
             throw new UserAlreadyExistsException("Пользователь с таким именем уже существует");
         }
 
-        User user = entityMapper.toUserEntity(dto, passwordEncoder);
+        User user = entityMapper.toUserCreateEntity(dto, passwordEncoder);
         User savedUser = userRepository.save(user);
         UserDto registeredUser = entityMapper.toUserDto(savedUser);
 
@@ -56,6 +61,7 @@ public class UserService {
      * @return DTO с токеном, временем истечения и данными пользователя
      * @throws BadCredentialsException если пароль не совпадает
      */
+    @Transactional
     public AuthResponseDto login(LoginRequestDto loginRequestDto) {
         UserDetails userDetails = userRepository.findByUsername(loginRequestDto.getUsername())
             .orElseThrow(() -> new BadCredentialsException("Неверное имя пользователя или пароль"));
@@ -72,16 +78,26 @@ public class UserService {
         return new AuthResponseDto(token, expirationTime, user);
     }
 
+    @Transactional(readOnly = true)
     public UserDto findById(Integer id) {
         return userRepository.findById(id)
             .map(entityMapper::toUserDto)
-            .orElseThrow(() -> new UserNotFoundException("Пользователь с ID " + id + " не найден"));
+            .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден"));
     }
 
+    @Transactional(readOnly = true)
     public UserDto findByUsername(String username) {
         return userRepository.findByUsername(username)
             .map(entityMapper::toUserDto)
-            .orElseThrow(() -> new UserNotFoundException("Пользователь с именем " + username + " не найден"));
+            .orElseThrow(() -> new ResourceNotFoundException("Пользователь с именем " + username + " не найден"));
+    }
+
+    @Transactional
+    public User me() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return userRepository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + username));
     }
 }
 
